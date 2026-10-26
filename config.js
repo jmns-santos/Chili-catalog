@@ -26,8 +26,8 @@ window.CONFIG = {
      chave: chave pública "anon" / "publishable" (nunca a chave secreta "service_role")
      regiao: onde ficam os dados, para o texto de privacidade */
   comunidade: {
-    url: '',
-    chave: '',
+    url: 'https://omwiyggsymbgbinbmnvn.supabase.co',
+    chave: 'sb_publishable_Nc0pJpJZgb1SudnGr6IQZA_C6V5ffqm',
     regiao: 'UE'   /* 'UE' = União Europeia (escolher a região Frankfurt ao criar o projeto) */
   },
 
