@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CATÁLOGO CHILI</title>
+<meta name="description" content="Catálogo de malaguetas: picante (Scoville), aroma, origem, refeições e harmonizações.">
+<meta name="author" content="Jorge dos Santos (desenvolvimento, com recurso a inteligência artificial); Edgar Andrade (sementes, produção e identificação)">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23B3261E' d='M18.2 10.6C21.4 10.2 22.6 13 21.6 15.4 20.2 18.9 16.4 22.2 11.4 23.4 10.2 23.7 9.6 22.6 10.5 21.9 13.6 19.5 15.2 16.6 15.8 13.6 16.1 12 16.9 10.8 18.2 10.6Z'/%3E%3Cpath d='M19.6 10.8C19.9 8.9 21 7.6 22.8 7.1M16.9 11.6C17.9 10.3 20.4 10 21.6 11.3' fill='none' stroke='%232F7D32' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/estilo.css?v=7">
+</head>
+<body>
+<a class="skip" href="#resultados" data-i18n="skip">Saltar para o catálogo</a>
+
+<div class="bar" id="bar">
+  <div class="bar-in">
+    <a class="brand" href="#topo" aria-hidden="true" tabindex="-1"><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path class="pod" d="M18.2 10.6C21.4 10.2 22.6 13 21.6 15.4 20.2 18.9 16.4 22.2 11.4 23.4 10.2 23.7 9.6 22.6 10.5 21.9 13.6 19.5 15.2 16.6 15.8 13.6 16.1 12 16.9 10.8 18.2 10.6Z"/><path class="stem" d="M19.6 10.8C19.9 8.9 21 7.6 22.8 7.1M16.9 11.6C17.9 10.3 20.4 10 21.6 11.3" fill="none" stroke-width="1.8" stroke-linecap="round"/></svg><span data-i18n="title">CATÁLOGO CHILI</span></a>
+    <div class="bar-tools">
+      <button type="button" class="idcta" id="bId" aria-haspopup="dialog" data-i18n-aria="id_cta_aria"><svg class="idlogo" viewBox="0 0 32 32" aria-hidden="true"><path class="scan" d="M4 10V6.5A2.5 2.5 0 0 1 6.5 4H10M22 4h3.5A2.5 2.5 0 0 1 28 6.5V10M28 22v3.5a2.5 2.5 0 0 1-2.5 2.5H22M10 28H6.5A2.5 2.5 0 0 1 4 25.5V22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path class="pod" d="M18.2 10.6C21.4 10.2 22.6 13 21.6 15.4 20.2 18.9 16.4 22.2 11.4 23.4 10.2 23.7 9.6 22.6 10.5 21.9 13.6 19.5 15.2 16.6 15.8 13.6 16.1 12 16.9 10.8 18.2 10.6Z"/><path class="stem" d="M19.6 10.8C19.9 8.9 21 7.6 22.8 7.1M16.9 11.6C17.9 10.3 20.4 10 21.6 11.3" fill="none" stroke-width="1.8" stroke-linecap="round"/><path class="beam" d="M6 16h20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span data-i18n="tab_id">Identificar</span></button>
+      <div class="menu">
+        <button type="button" class="tool" id="bLang" aria-haspopup="true" aria-expanded="false" aria-controls="pLang"><img id="bLangFlag" src="bandeiras/pt.svg" alt="" width="24" height="18"><span id="bLangName">Português</span></button>
+        <div class="pop" id="pLang" hidden><ul role="list" id="langList"></ul></div>
+      </div>
+      <div class="menu">
+        <button type="button" class="tool" id="bA11y" aria-haspopup="true" aria-expanded="false" aria-controls="pA11y"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><path d="M4 8.5c2.6.8 5.3 1.2 8 1.2s5.4-.4 8-1.2M12 9.7v4.8m0 0-3 6.5m3-6.5 3 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-i18n="a11y">Acessibilidade</span></button>
+        <div class="pop" id="pA11y" hidden>
+          <fieldset><legend data-i18n="a11y_text">Tamanho do texto</legend>
+            <div class="seg" id="aText"><button type="button" data-v="1" data-i18n-aria="a11y_normal">A</button><button type="button" data-v="2" data-i18n-aria="a11y_big" style="font-size:1.15em">A</button><button type="button" data-v="3" data-i18n-aria="a11y_bigger" style="font-size:1.3em">A</button></div>
+          </fieldset>
+          <fieldset><legend data-i18n="a11y_theme">Tema</legend>
+            <div class="seg" id="aTheme"><button type="button" data-v="auto" data-i18n="theme_auto">Automático</button><button type="button" data-v="light" data-i18n="theme_light">Claro</button><button type="button" data-v="dark" data-i18n="theme_dark">Escuro</button></div>
+          </fieldset>
+          <label class="switch"><input type="checkbox" id="aContrast"><span data-i18n="a11y_contrast">Alto contraste</span></label>
+          <label class="switch"><input type="checkbox" id="aMotion"><span data-i18n="a11y_motion">Reduzir animações</span></label>
+          <label class="switch"><input type="checkbox" id="aLinks"><span data-i18n="a11y_links">Sublinhar ligações e botões</span></label>
+        </div>
+      </div>
+      <button type="button" class="tool cartbtn" id="bCart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2.2l2.3 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span data-i18n="cart">Encomenda</span><b class="badge" id="cartCount" hidden>0</b></button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="topo">
+  <header class="hero">
+    <h1 id="titulo" data-i18n-html="title_html">CATÁLOGO <span>CHILI</span></h1>
+  </header>
+  <div class="intro">
+    <div class="intro-txt">
+      <p class="lede" data-i18n="lede">Malaguetas da coleção, da mais picante para a mais suave: quanto picam, que aroma têm, de onde vêm e com que pratos casam.</p>
+      <section class="curio" id="curiosidades" aria-labelledby="tCurios" aria-roledescription="carrossel">
+        <h2 class="vh" id="tCurios" data-i18n="cur_t">Curiosidades</h2>
+        <div class="cbox">
+          <button type="button" class="cimg" id="cImg"></button>
+          <div class="cmain">
+            <p class="ckick"><span data-i18n="cur_kick">Sabia que…</span> <span class="cpos" id="cPos"></span></p>
+            <div class="cslide" id="cSlide" aria-live="off" aria-atomic="true"></div>
+          </div>
+          <div class="cctl">
+            <button type="button" class="iconbtn" id="cPrev" data-i18n-aria="cur_prev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button type="button" class="iconbtn" id="cPlay" data-i18n-aria="cur_pause"></button>
+            <button type="button" class="iconbtn" id="cNext" data-i18n-aria="cur_next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+        <div class="cbar" aria-hidden="true"><i id="cBar"></i></div>
+      </section>
+      <p class="credit"><span data-i18n="credit">Sementes, produção e identificação:</span> Edgar Andrade <a class="social" href="https://www.instagram.com/ed_racso/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3a1 1 0 0 1 1 1v9.2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.4" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>@ed_racso</span><span class="vh" data-i18n="ig"> no Instagram</span></a></p>
+    </div>
+    <dl class="stats" id="stats"></dl>
+  </div>
+
+  <section class="ribbon" aria-labelledby="tRibbon">
+    <h2 class="kicker" id="tRibbon" data-i18n="ribbon_t">Da mais suave à mais picante</h2>
+    <div class="rtrack" id="ribbon"></div>
+    <div class="rscale" aria-hidden="true"><span data-i18n="ribbon_lo">suave</span><span data-i18n="ribbon_hi">extremo</span></div>
+  </section>
+
+  <section class="presets" aria-labelledby="tPresets">
+    <h2 class="kicker" id="tPresets" data-i18n="presets_t">Sugestões rápidas</h2>
+    <div class="prow" id="presets"></div>
+    <div class="pmore" id="pMore" hidden>
+      <div class="seg pgsel" id="pGroups" role="group" data-i18n-aria="pr_groups"></div>
+      <div class="prow" id="pMoreChips"></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <aside class="filters" id="filtros" aria-labelledby="tFiltros">
+      <div class="fhead">
+        <h2 id="tFiltros"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-i18n="filters">Filtrar</span></h2>
+        <button type="button" class="iconbtn fclose" id="fClose" data-i18n-aria="close">×</button>
+      </div>
+      <div class="fscroll">
+        <label class="search"><span class="vh" data-i18n="search_label">Procurar</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="search" id="q" data-i18n-ph="search_ph" placeholder="Procurar nome, ingrediente, prato…"></label>
+        <fieldset class="fg"><legend data-i18n="f_heat">Picante</legend><div class="opts heat" id="fNivel"></div></fieldset>
+        <fieldset class="fg"><legend data-i18n="f_aroma">Aroma</legend><div class="opts" id="fAroma"></div></fieldset>
+        <fieldset class="fg"><legend data-i18n="f_perfil">Perfil de aroma</legend><div class="opts" id="fPerfil"></div></fieldset>
+        <fieldset class="fg"><legend data-i18n="f_meal">Refeição</legend><div class="opts" id="fRef"></div></fieldset>
+        <fieldset class="fg"><legend data-i18n="f_prep">Preparação</legend><div class="opts" id="fPrep"></div></fieldset>
+        <fieldset class="fg"><legend data-i18n="f_trad">Tradição culinária</legend><div class="opts" id="fTrad"></div></fieldset>
+        <fieldset class="fg"><legend data-i18n="f_country">Origem</legend><div class="opts" id="fPais"></div></fieldset>
+        <fieldset class="fg"><legend data-i18n="f_species">Espécie</legend><div class="opts" id="fEsp"></div></fieldset>
+        <label class="switch"><input type="checkbox" id="fFoto"><span data-i18n="f_photo">Só com fotografia</span></label>
+      </div>
+      <div class="ffoot">
+        <button type="button" class="btn ghost" id="limpar" data-i18n="clear">Limpar filtros</button>
+        <button type="button" class="btn primary fdone" id="fDone"></button>
+      </div>
+    </aside>
+
+    <main class="results" id="resultados" tabindex="-1">
+      <div class="rbar">
+        <div class="tabs" role="tablist" data-i18n-aria="views">
+          <button role="tab" id="tab-fichas" aria-controls="v-fichas" aria-selected="true" data-v="fichas" data-i18n="tab_cards">Variedades</button>
+          <button role="tab" id="tab-mapa" aria-controls="v-mapa" aria-selected="false" data-v="mapa" tabindex="-1" data-i18n="tab_map">Mapa</button>
+          <button role="tab" id="tab-regua" aria-controls="v-regua" aria-selected="false" data-v="regua" tabindex="-1" data-i18n="tab_chart">Picante × aroma</button>
+        </div>
+        <label class="sort"><span data-i18n="sort">Ordenar</span>
+          <select id="fSort">
+            <option value="desc" data-i18n="sort_desc">Mais picante primeiro</option>
+            <option value="asc" data-i18n="sort_asc">Menos picante primeiro</option>
+            <option value="aroma" data-i18n="sort_aroma">Mais aromático primeiro</option>
+            <option value="nome" data-i18n="sort_name">Nome (A–Z)</option>
+          </select>
+        </label>
+      </div>
+      <div class="active" id="active" aria-live="polite"></div>
+
+      <section id="v-fichas" role="tabpanel" aria-labelledby="tab-fichas"><div class="grid" id="grid"></div></section>
+      <section id="v-mapa" role="tabpanel" aria-labelledby="tab-mapa" hidden>
+        <div class="mapwrap">
+          <div class="mapbox">
+            <div class="map" id="map" tabindex="0" role="group" data-i18n-aria="map_aria" aria-describedby="mapKeys"></div>
+            <div class="mapctl" role="toolbar" data-i18n-aria="map_tools">
+              <button type="button" class="iconbtn" id="mzIn" data-i18n-aria="map_zin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+              <button type="button" class="iconbtn" id="mzOut" data-i18n-aria="map_zout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+              <button type="button" class="iconbtn" id="mzReset" data-i18n-aria="map_reset"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 12h16M12 4c2.5 2.2 3.5 5 3.5 8s-1 5.8-3.5 8M12 4c-2.5 2.2-3.5 5-3.5 8s1 5.8 3.5 8" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+            </div>
+            <div class="mlegend" id="mLegend"></div>
+            <p class="vh" id="mapKeys" data-i18n="map_keys">Teclado: setas para mover, + e − para aproximar, 0 para o mundo inteiro.</p>
+          </div>
+          <div class="maplist">
+            <div id="mapPanel" class="mpanel" tabindex="-1" hidden></div>
+            <div id="mapCountries">
+              <h3 data-i18n="map_title">Origem das variedades</h3>
+              <p class="muted small" data-i18n="map_help">Toque num país para ver as malaguetas de lá.</p>
+              <ul id="paises" role="list"></ul>
+              <p class="muted small" id="semPais"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="v-regua" role="tabpanel" aria-labelledby="tab-regua" hidden>
+        <div class="rhead">
+          <p class="muted" data-i18n="chart_help">Cada ponto é uma variedade.</p>
+          <div class="seg" id="chartGroup" role="group"><button type="button" data-g="aroma" aria-pressed="true" data-i18n="by_aroma">Por aroma</button><button type="button" data-g="especie" aria-pressed="false" data-i18n="by_species">Por espécie</button></div>
+        </div>
+        <div class="chart" id="chart"></div>
+      </section>
+    </main>
+  </div>
+
+  <section class="guide" id="guia" aria-labelledby="tGuia">
+    <h2 id="tGuia" data-i18n="guide_t">Como ler o catálogo</h2>
+    <div class="gcols">
+      <div><h3 data-i18n="g_heat">Picante</h3><table class="scale" id="tNivel"></table><p class="small muted" data-i18n-html="g_heat_p"></p></div>
+      <div><h3 data-i18n="g_aroma">Aroma</h3><table class="scale" id="tAroma"></table><p class="small" data-i18n-html="g_aroma_p"></p></div>
+      <div><h3 data-i18n="g_tech">Técnica</h3><ul class="tips" id="tips"></ul></div>
+      <div><h3 data-i18n="g_market">Equivalências de mercado</h3><table class="scale" id="tMercado"></table><p class="small muted" data-i18n="g_market_p">Valores da tabela de Scoville da Wikipedia; força calculada pelo valor típico de cada intervalo.</p></div>
+    </div>
+  </section>
+
+  <section class="sources" aria-labelledby="tFontes">
+    <details class="srcbox">
+      <summary><svg class="lupa" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><h2 id="tFontes" data-i18n="sources_t">Fontes</h2><span class="n" id="nFontes"></span></summary>
+      <ul id="fontes"></ul>
+    </details>
+  </section>
+
+  <footer class="foot">
+    <p id="foot"></p>
+    <p class="dev"><span data-i18n="dev">Desenvolvido por</span> Jorge dos Santos <a class="social" href="https://www.instagram.com/jmns.santos/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3a1 1 0 0 1 1 1v9.2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.4" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>@jmns.santos</span><span class="vh" data-i18n="ig"> no Instagram</span></a> <a class="social" href="mailto:jmns.santos@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m4 7 8 6 8-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>jmns.santos@gmail.com</span></a></p>
+    <p class="dev"><span data-i18n="credit">Sementes, produção e identificação:</span> Edgar Andrade <a class="social" href="https://www.instagram.com/ed_racso/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3a1 1 0 0 1 1 1v9.2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.4" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>@ed_racso</span><span class="vh" data-i18n="ig"> no Instagram</span></a></p>
+    <p class="loc">© 2026 · <img class="flag" src="bandeiras/pt.svg" alt="" width="24" height="18"> Póvoa de Varzim, Porto, <span id="locPais">Portugal</span></p>
+    <p class="ainote" data-i18n="ai_note">Nota: website desenvolvido com recurso a inteligência artificial.</p>
+  </footer>
+</div>
+
+<nav class="mbar" id="mbar" data-i18n-aria="nav">
+  <button type="button" id="mFilter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-i18n="filters">Filtrar</span><b class="badge" id="mFilterCount" hidden>0</b></button>
+  <button type="button" data-nav="fichas" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span data-i18n="nav_cards">Variedades</span></button>
+  <button type="button" data-nav="mapa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-i18n="nav_map">Mapa</span></button>
+  <button type="button" data-nav="regua"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="14" r="1.8"/><circle cx="13" cy="9.5" r="1.8"/><circle cx="17.5" cy="12" r="1.8"/><circle cx="16" cy="6.5" r="1.8"/></svg><span data-i18n="nav_chart">Gráfico</span></button>
+  <button type="button" data-nav="guia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z M9 20a4 4 0 0 1-4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 9h6M9 13h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-i18n="nav_guide">Guia</span></button>
+  <button type="button" id="mCart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2.2l2.3 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-i18n="cart">Encomenda</span><b class="badge" id="mCartCount" hidden>0</b></button>
+</nav>
+
+<dialog id="ficha" aria-labelledby="fTitulo">
+  <button class="iconbtn close" id="fechar" type="button" data-i18n-aria="close">×</button>
+  <div id="fBody"></div>
+</dialog>
+
+<dialog id="identificar" class="idlg" aria-labelledby="idT">
+  <div class="dhead"><h2 id="idT"><svg class="idlogo" viewBox="0 0 32 32" aria-hidden="true"><path class="scan" d="M4 10V6.5A2.5 2.5 0 0 1 6.5 4H10M22 4h3.5A2.5 2.5 0 0 1 28 6.5V10M28 22v3.5a2.5 2.5 0 0 1-2.5 2.5H22M10 28H6.5A2.5 2.5 0 0 1 4 25.5V22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path class="pod" d="M18.2 10.6C21.4 10.2 22.6 13 21.6 15.4 20.2 18.9 16.4 22.2 11.4 23.4 10.2 23.7 9.6 22.6 10.5 21.9 13.6 19.5 15.2 16.6 15.8 13.6 16.1 12 16.9 10.8 18.2 10.6Z"/><path class="stem" d="M19.6 10.8C19.9 8.9 21 7.6 22.8 7.1M16.9 11.6C17.9 10.3 20.4 10 21.6 11.3" fill="none" stroke-width="1.8" stroke-linecap="round"/></svg><span data-i18n="id_t">Identificar pela fotografia</span></h2><button class="iconbtn" id="idFechar" type="button" data-i18n-aria="close">×</button></div>
+  <div class="dbody">
+        <div class="idwrap">
+          <div class="idin">
+            <p data-i18n="id_help">Fotografe o fruto inteiro sobre uma superfície lisa e neutra.</p>
+            <div class="idbtns">
+              <input type="file" id="idCam" accept="image/*" capture="environment" class="vh">
+              <label for="idCam" class="btn primary idbtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3a1 1 0 0 1 1 1v9.2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.4" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span data-i18n="id_cam">Tirar fotografia</span></label>
+              <input type="file" id="idGal" accept="image/*" class="vh">
+              <label for="idGal" class="btn idbtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9.5" r="1.8" fill="currentColor"/><path d="m4 18 5.5-5.5 4 4 2.5-2.5 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-i18n="id_gal">Escolher da galeria</span></label>
+            </div>
+            <p class="small muted" data-i18n="id_privacy">A fotografia não sai do seu aparelho.</p>
+            <figure class="idprev" id="idPrev" hidden><canvas id="idCanvas"></canvas><figcaption class="small muted" data-i18n="id_prev">Zona analisada</figcaption></figure>
+          </div>
+          <div class="idout" id="idOut" aria-live="polite"></div>
+        </div>
+        <p class="small muted idnote" id="idNote"></p>
+  </div>
+</dialog>
+
+<dialog id="encomenda" class="drawer" aria-labelledby="oTitulo">
+  <div class="dhead"><h2 id="oTitulo" data-i18n="o_title">Pedido de encomenda</h2><button class="iconbtn" id="oFechar" type="button" data-i18n-aria="close">×</button></div>
+  <div class="dbody" id="oBody"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js?v=7"></script>
+<script src="data/catalogo.js?v=7"></script>
+<script src="data/mundo.js?v=7"></script>
+<script src="data/assinaturas.js?v=7"></script>
+<script src="assets/app.js?v=7"></script>
+</body>
+</html>
