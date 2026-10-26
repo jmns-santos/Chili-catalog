@@ -1,0 +1,17 @@
+{
+  "name": "CATÁLOGO CHILI",
+  "short_name": "Catálogo Chili",
+  "description": "Malaguetas para a cozinha: picante, aroma, origem e pratos. Coleção de Edgar Andrade, variedades de referência e coleções da comunidade.",
+  "lang": "pt-PT",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F1EA",
+  "theme_color": "#A3241A",
+  "icons": [
+    {"src": "assets/icones/icone-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "assets/icones/icone-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "assets/icones/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "assets/icones/icone.svg", "sizes": "any", "type": "image/svg+xml"}
+  ]
+}

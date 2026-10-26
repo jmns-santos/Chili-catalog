@@ -1,10 +1,13 @@
 (function () {
 'use strict';
+if (window.CC_EMBUTIDO) return;
 const D = window.CATALOGO, M = window.MUNDO, C = window.CONFIG || {};
 const ORDERS = C.encomendas !== false;
+const CS = window.CCStore;
+const VIEW = {modo: 'edgar', outro: null};
 if (!ORDERS) document.documentElement.dataset.encomendas = 'off';
 const V = D.variedades.filter(v => v.publico !== false);
-const byId = Object.fromEntries(V.map(v => [v.id, v]));
+const byId = Object.assign(Object.create(null), Object.fromEntries(V.map(v => [v.id, v])));
 window.I18N = window.I18N || {};
 
 /* ================= textos da interface (português = base) ================= */
@@ -12,7 +15,7 @@ const PT = {
   skip:'Saltar para o catálogo', a11y:'Acessibilidade', a11y_text:'Tamanho do texto', a11y_normal:'Texto normal', a11y_big:'Texto grande', a11y_bigger:'Texto muito grande',
   a11y_theme:'Tema', theme_auto:'Automático', theme_light:'Claro', theme_dark:'Escuro', a11y_contrast:'Alto contraste', a11y_motion:'Reduzir animações', a11y_links:'Sublinhar ligações e botões',
   cart:'Encomenda', lang:'Língua',
-  lede:'Malaguetas da coleção, da mais picante para a mais suave: quanto picam, que aroma têm, de onde vêm e com que pratos casam.',
+  lede:'Malaguetas da coleção de Edgar Andrade e variedades de referência, primeiro as fotografadas, da mais picante para a mais suave: quanto picam, que aroma têm, de onde vêm e com que pratos casam.',
   st_var:'variedades', st_fotos:'fotografias', st_paises:'países', st_arom:'muito aromáticas',
   presets_t:'Sugestões rápidas', pr_peixe:'Peixe e marisco', pr_perfume:'Muito aroma, pouco fogo', pr_rechear:'Para rechear', pr_secar:'Pó e flocos', pr_ferm:'Molhos fermentados', pr_super:'Superhots',
   filters:'Filtrar', search_label:'Procurar', search_ph:'Procurar nome, ingrediente, prato…',
@@ -110,7 +113,138 @@ const PT = {
   c_milk:'<b>Contra o ardor.</b> Num estudo de 2019, o leite aliviou mais do que água, refrigerantes ou cerveja sem álcool.',
   c_rec:'<b>Recorde.</b> Desde 2023, a mais picante do Guinness é a Pepper X: 2,69 milhões de SHU em média.',
   c_sp5:'<b>Cinco espécies.</b> Cultivam-se sobretudo <i>C. annuum</i>, <i>C. baccatum</i>, <i>C. chinense</i>, <i>C. frutescens</i> e <i>C. pubescens</i>.',
-  c_chin:'<b>Nome enganador.</b> Em 1776, Jacquin chamou-lhe <i>C. chinense</i> («da China»), mas a espécie é americana.'
+  c_chin:'<b>Nome enganador.</b> Em 1776, Jacquin chamou-lhe <i>C. chinense</i> («da China»), mas a espécie é americana.',
+  ref_tag:"Referência",
+  ref_note:"Variedade de referência: não faz parte da coleção de Edgar Andrade.",
+  st_col:"na coleção",
+  st_ref:"de referência",
+  st_incol:"na coleção",
+  loading:"a carregar",
+  retry:"Tentar de novo",
+  back:"Voltar",
+  f_col:"Coleção",
+  fc_edgar:"Coleção Edgar Andrade",
+  fc_ref:"Referência",
+  fc_mine:"Na minha coleção",
+  fc_missing:"Ainda não tenho",
+  fc_trade:"Para troca",
+  est_sementes:"Sementes",
+  est_planta:"A crescer",
+  est_fruto:"Com fruto",
+  est_quero:"Quero ter",
+  col_start:"Iniciar coleção",
+  col_mine:"A minha coleção",
+  col_edgar:"Coleção Edgar Andrade",
+  col_switch_aria:"Que coleção ver",
+  col_anon:"Colecionador",
+  col_of:"Coleção de {name}",
+  viewing:"A ver a coleção de",
+  col_lede:"A sua coleção: marque as malaguetas que tem, junte fotografias com data e acompanhe cada planta. A informação de cada variedade é a mesma do catálogo.",
+  col_lede_other:"Coleção partilhada por {name}. Só aparecem as variedades que esta pessoa juntou.",
+  col_cta:"Comece a sua coleção: marque esta e outras variedades e junte as suas fotografias.",
+  col_n:"{n} variedades na coleção",
+  col_n_1:"1 variedade na coleção",
+  col_add:"Adicionar",
+  col_add_long:"Adicionar à minha coleção",
+  col_add_aria:"Adicionar {name} à minha coleção",
+  col_added:"{name} entrou na sua coleção.",
+  col_undo:"Desfazer",
+  col_in:"Na minha coleção",
+  col_see_mine:"Ver a minha coleção",
+  col_remove:"Retirar da coleção",
+  col_removed:"Retirada da coleção.",
+  col_remove_confirm:"Retirar {name} da coleção? As fotografias desta variedade também são apagadas.",
+  col_state:"Estado",
+  col_since:"Desde",
+  col_trade:"Tenho sementes para troca",
+  col_note:"Notas",
+  col_note_ph:"Ex.: semeada em março, primeira flor em junho…",
+  col_photo_cam:"Tirar fotografia",
+  col_photo_add:"Escolher fotografias",
+  col_photo_date:"Data da fotografia",
+  col_photo_del:"Apagar fotografia",
+  col_photo_del_confirm:"Apagar esta fotografia?",
+  col_photo_max:"Máximo de {n} fotografias por variedade.",
+  col_photo_err:"Não foi possível usar esta imagem. Experimente uma fotografia JPEG ou PNG.",
+  col_photo_gps:"Ao guardar, a fotografia perde a localização e os outros dados internos.",
+  col_first_photo:"Junte a primeira fotografia",
+  col_saved:"Guardado.",
+  col_err:"Não foi possível guardar. Tente de novo.",
+  tab_comm:"Comunidade",
+  nav_col:"Coleção",
+  comm_t:"Comunidade de colecionadores",
+  comm_intro:"Cada colecionador decide se a coleção fica só para si ou se aparece aqui.",
+  comm_cta:"Ainda não tem coleção. Pode começar já: não é preciso preencher nada e a coleção fica privada até decidir o contrário.",
+  comm_off:"A comunidade online ainda não está ativa neste site. Por agora, a sua coleção fica guardada só neste aparelho e pode exportá-la quando quiser.",
+  comm_join:"Para mostrar a sua coleção aqui, entre com o seu email e escolha «Mostrar na comunidade» no perfil.",
+  comm_signin:"Entrar com email",
+  comm_loading:"A carregar a comunidade…",
+  comm_err:"Não foi possível carregar a comunidade.",
+  comm_empty:"Ainda não há coleções públicas. Pode ser a primeira.",
+  comm_search:"Procurar colecionador, localidade ou país",
+  comm_you:"Você",
+  comm_trade_n:"{n} para troca",
+  comm_top:"Mais colecionadas",
+  comm_n_col:"{n} colecionadores",
+  comm_n_col_1:"1 colecionador",
+  comm_public_you:"A sua coleção é pública: aparece na comunidade.",
+  comm_private_you:"A sua coleção é privada: só você a vê.",
+  pf_title_new:"Iniciar coleção",
+  pf_title:"O meu perfil",
+  pf_intro:"Nada é obrigatório. Escolha se a coleção é só para si ou se quer mostrá-la na comunidade. O nome e os outros dados do perfil são opcionais.",
+  pf_name:"Nome a mostrar",
+  pf_name_ph:"Ex.: Maria, ou um nome de colecionador",
+  pf_color:"Cor do avatar",
+  pf_country:"País",
+  pf_country_none:"Prefiro não indicar",
+  pf_place:"Localidade",
+  pf_bio:"Sobre a coleção",
+  pf_ig:"Instagram",
+  pf_priv_t:"Como quer usar a coleção?",
+  pf_private:"Só para mim",
+  pf_public:"Mostrar na comunidade",
+  pf_public_need:"Para mostrar na comunidade é preciso entrar com email (mais abaixo).",
+  pf_public_off:"A comunidade online ainda não está ativa neste site.",
+  pf_public_consent:"Autorizo que a coleção, as fotografias e os dados do perfil que preenchi (nome, país, localidade, texto, Instagram) fiquem visíveis para quem visita o site. O email nunca é mostrado. Posso voltar a «Só para mim» quando quiser.",
+  pf_where_local:"Fica guardado só neste aparelho, neste browser.",
+  pf_where_online:"Guardado na sua conta ({email}).",
+  pf_start:"Começar a coleção",
+  pf_save:"Guardar",
+  pf_created:"Perfil criado. Toque em «Adicionar» nas variedades que tem.",
+  pf_account_t:"Conta (opcional)",
+  pf_account_p:"Com conta, a coleção fica guardada online, pode usá-la noutros aparelhos e, se quiser, partilhá-la. Só precisa do email: enviamos um código para entrar.",
+  pf_email:"Email",
+  pf_send:"Enviar código",
+  pf_code:"Código recebido por email",
+  pf_verify:"Entrar",
+  pf_sent:"Enviámos um email para {email}. Escreva o código ou abra a ligação que recebeu.",
+  pf_signed_in:"Sessão iniciada.",
+  pf_signout:"Sair da conta",
+  pf_migrate:"Tem uma coleção guardada só neste aparelho.",
+  pf_migrate_btn:"Enviar para a conta",
+  pf_migrated:"{n} variedades enviadas para a conta.",
+  pf_data_t:"Os meus dados",
+  pf_export:"Exportar para ficheiro",
+  pf_import:"Importar ficheiro",
+  pf_imported:"{n} variedades importadas.",
+  pf_import_err:"Este ficheiro não é uma exportação da coleção.",
+  pf_delete_local:"Apagar a coleção deste aparelho",
+  pf_delete_online:"Apagar a conta e todos os dados",
+  pf_delete_confirm:"Apagar o perfil, a coleção e as fotografias? Não é possível desfazer.",
+  pf_deleted:"Dados apagados.",
+  pf_privacy_link:"Privacidade e proteção de dados",
+  pf_err_consent:"Para mostrar a coleção na comunidade, confirme a autorização.",
+  pf_err_ig:"O Instagram só pode ter letras, números, pontos e sublinhados.",
+  pf_err_email:"Escreva um email válido.",
+  pf_err_send:"Não foi possível enviar o email. Tente mais tarde.",
+  pf_err_code:"Código inválido ou expirado.",
+  pv_title:"Privacidade e proteção de dados",
+  pv_region_eu:"na União Europeia",
+  pv_html:"<p><b>Responsável:</b> Jorge dos Santos, que mantém este site ({email}).</p><p><b>Nada é obrigatório.</b> Pode colecionar sem conta e sem indicar qualquer dado pessoal. Todos os campos do perfil são opcionais.</p><p><b>Sem conta</b>, o perfil, a coleção e as fotografias ficam só neste aparelho, no armazenamento do browser, e não são enviados para lado nenhum. «Apagar a coleção deste aparelho» elimina-os.</p><p><b>Com conta</b> (opcional, a partir dos 13 anos), guardamos o email (só para entrar), os campos do perfil que preencher, a coleção e as fotografias no serviço Supabase, que os trata por conta deste site, em servidores {regiao}. Base legal: o seu consentimento, que pode retirar a qualquer momento. Os dados ficam guardados até os apagar.</p><p><b>Privada por defeito.</b> A coleção só aparece na comunidade se escolher «Mostrar na comunidade» e der autorização. O email nunca é mostrado. As fotografias são guardadas sem a localização GPS nem outros dados internos e, enquanto a coleção for privada, só o próprio as vê.</p><p><b>Os seus direitos:</b> ver e corrigir os dados no perfil, exportá-los para um ficheiro, voltar a «Só para mim» a qualquer momento e apagar a conta com tudo o que contém. Para outras questões, escreva para o email acima. Pode também apresentar reclamação à Comissão Nacional de Proteção de Dados (www.cnpd.pt) ou à autoridade de proteção de dados do seu país.</p><p>O site não usa cookies de publicidade nem ferramentas de estatística. O browser guarda só as suas preferências (língua, acessibilidade) e, se a usar, a coleção e a sessão. O tipo de letra está no próprio site. O alojamento (GitHub Pages) regista endereços IP por razões técnicas e de segurança.</p>",
+  how_read:"Como ler",
+  pf_private_d:"Uso pessoal e privado: ninguém mais vê a coleção.",
+  pf_public_d:"A coleção aparece na página de colecionadores, só com os dados que decidir preencher.",
+  pf_fields_t:"Dados do perfil (todos opcionais)"
 };
 const T = (k, vars) => {
   const L = I18N[lang] && I18N[lang].ui;
@@ -124,8 +258,8 @@ const X = s => { if (s == null || s === '') return s; const L = I18N[lang] && I1
 /* ================= vocabulário ================= */
 const PERFIS = {'Tropical':'--p-trop','Cítrico':'--p-citr','Floral':'--p-flor','Frutado doce':'--p-fdoce','Terroso / fumado':'--p-terr','Vegetal':'--p-veg'};
 const REFEICOES = ['Peixe e marisco','Carnes','Aves','Vegetariano','Sopas e estufados','Arroz, massas e pizza','Saladas e crus','Petiscos','Salteados e wok','Molhos e condimentos','Doces e sobremesas'];
-const ESPECIES = ['C. chinense','C. baccatum','C. annuum','C. pubescens','*outra'];
-const espOf = v => { const e = v.especie || ''; if (/chinense/.test(e)) return 'C. chinense'; if (/baccatum/.test(e)) return 'C. baccatum'; if (/pubescens/.test(e)) return 'C. pubescens'; if (/^C\. annuum/.test(e)) return 'C. annuum'; return '*outra'; };
+const ESPECIES = ['C. chinense','C. baccatum','C. annuum','C. frutescens','C. pubescens','*outra'];
+const espOf = v => { const e = v.especie || ''; if (/chinense/.test(e)) return 'C. chinense'; if (/baccatum/.test(e)) return 'C. baccatum'; if (/pubescens/.test(e)) return 'C. pubescens'; if (/^C\. annuum/.test(e)) return 'C. annuum'; if (/^C\. frutescens/.test(e)) return 'C. frutescens'; return '*outra'; };
 const espName = e => e === '*outra' ? T('other_species') : e;
 const LOCALE = {pt:'pt-PT', en:'en-GB', de:'de-DE', fr:'fr-FR', it:'it-IT', es:'es-ES', zh:'zh-CN'};
 let lang = 'pt';
@@ -134,13 +268,22 @@ const country = iso => { if (!iso) return ''; try { dn = dn || new Intl.DisplayN
 
 /* ================= utilitários ================= */
 const $ = s => document.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nf = (x, d = 0) => new Intl.NumberFormat(LOCALE[lang], {maximumFractionDigits:d}).format(x);
 const heatVar = n => n == null ? 'var(--muted)' : `var(--h${n})`;
 const aromaVar = n => n == null ? 'var(--muted)' : `var(--a${n})`;
 const POD = `<svg class="pod" viewBox="0 0 32 32" aria-hidden="true"><path d="M18.2 10.6C21.4 10.2 22.6 13 21.6 15.4 20.2 18.9 16.4 22.2 11.4 23.4 10.2 23.7 9.6 22.6 10.5 21.9 13.6 19.5 15.2 16.6 15.8 13.6 16.1 12 16.9 10.8 18.2 10.6Z"/><path d="M19.6 10.8C19.9 8.9 21 7.6 22.8 7.1M16.9 11.6C17.9 10.3 20.4 10 21.6 11.3" fill="none" stroke-width="1.8" stroke-linecap="round"/></svg>`;
-const unidTag = v => v.grupo === 'Por identificar' ? `<span class="unid">${esc(T('unid'))}</span>` : '';
-const flagImg = (iso, cls) => iso ? `<img class="${cls || 'flag'}" src="bandeiras/${iso.toLowerCase()}.svg" alt="${esc(T('flag_alt', {c: country(iso)}))}" width="28" height="21" loading="lazy">` : '';
+const unidTag = v => VIEW.modo !== 'edgar' ? '' : v.grupo === 'Por identificar' ? `<span class="unid">${esc(T('unid'))}</span>` : v.ref ? `<span class="unid ref">${esc(T('ref_tag'))}</span>` : '';
+/* fotografias da coleção ativa: do Edgar (catálogo), as minhas ou as de outro colecionador */
+function itemDe(v){ return VIEW.modo === 'minha' ? CS.item(v.id) : VIEW.modo === 'outro' && VIEW.outro ? VIEW.outro.itens[v.id] || null : null; }
+function fotosV(v){
+  if (VIEW.modo === 'edgar') return (v.fotos || []).map(f => ({id: f.web, src: f.web.replace('fotos/', 'fotos/m/'), big: f.web, data: f.data}));
+  const it = itemDe(v); if (!it) return [];
+  return it.fotos.map(f => ({id: f.id, src: PH.get(f.id) || '', data: f.data}));
+}
+const foto1 = v => fotosV(v)[0] || null;
+const isoOk = iso => typeof iso === 'string' && /^[A-Za-z]{2}$/.test(iso);
+const flagImg = (iso, cls) => isoOk(iso) ? `<img class="${cls || 'flag'}" src="bandeiras/${iso.toLowerCase()}.svg" alt="${esc(T('flag_alt', {c: country(iso)}))}" width="28" height="21" loading="lazy">` : '';
 const store = {
   get(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -215,10 +358,11 @@ setupMenu($('#bA11y'), $('#pA11y'));
 
 /* ================= línguas ================= */
 const LANGS = C.linguas || [['pt','pt','Português']];
-const VER = '7';
+const VER = '9';
 let booted = false;
 function loadLang(code){
   return new Promise(res => {
+    if (!/^[a-z]{2}$/.test(code) || !LANGS.some(l => l[0] === code)) return res(false);
     if (code === 'pt' || I18N[code]) return res(true);
     const s = document.createElement('script'), t = setTimeout(() => res(!!I18N[code]), 15000);
     s.src = `i18n/${code}.js?v=${VER}`;
@@ -228,6 +372,7 @@ function loadLang(code){
   });
 }
 async function setLang(code, save = true){
+  if (!LANGS.some(l => l[0] === code)) code = 'pt';
   const ok = await loadLang(code);
   if (!ok){ toast(T('lang_err')); if (booted) return; code = 'pt'; }
   booted = true;
@@ -255,7 +400,7 @@ function applyStatic(){
 }
 
 /* ================= estado dos filtros ================= */
-const SETS = ['nivel', 'aroma', 'perfil', 'ref', 'prep', 'trad', 'pais', 'esp'];
+const SETS = ['col', 'nivel', 'aroma', 'perfil', 'ref', 'prep', 'trad', 'pais', 'esp'];
 const blank = () => Object.assign({q:'', sort:'desc', foto:false, preset:null, ids:new Set()}, Object.fromEntries(SETS.map(k => [k, new Set()])));
 const st = blank();
 const PRESET_GROUPS = [
@@ -295,17 +440,26 @@ function match(v, skip, S = st){
   if (skip !== 'trad' && S.trad.size && !(v.tradicao || []).some(r => S.trad.has(r))) return false;
   if (skip !== 'pais' && !has(S.pais, v.pais || '—')) return false;
   if (skip !== 'esp' && !has(S.esp, espOf(v))) return false;
-  if (S.foto && !(v.fotos && v.fotos.length)) return false;
+  if (VIEW.modo === 'outro' && !itemDe(v)) return false;
+  if (skip !== 'col' && S.col.size && ![...S.col].some(c => colTest(v, c))) return false;
+  if (S.foto && !fotosV(v).length) return false;
   if (S.ids && S.ids.size && !S.ids.has(v.id)) return false;
   if (S.q){ const h = hay(v); if (!norm(S.q).split(/\s+/).every(t => h.includes(t))) return false; }
   return true;
 }
+function prio(v){
+  if (VIEW.modo === 'edgar') return fotosV(v).length ? 0 : 1;
+  return itemDe(v) ? (fotosV(v).length ? 0 : 1) : 2;
+}
 function sorted(list){
   const a = list.slice();
-  if (st.sort === 'nome') a.sort((x, y) => nome(x).localeCompare(nome(y), LOCALE[lang]));
-  else if (st.sort === 'asc') a.sort((x, y) => (x.nivel == null ? 1e12 : heatScore(x)) - (y.nivel == null ? 1e12 : heatScore(y)));
-  else if (st.sort === 'aroma') a.sort((x, y) => ((aromaI(y) ?? -1) - (aromaI(x) ?? -1)) || (heatScore(y) - heatScore(x)));
-  else a.sort((x, y) => heatScore(y) - heatScore(x));
+  const base = st.sort === 'nome' ? (x, y) => nome(x).localeCompare(nome(y), LOCALE[lang])
+    : st.sort === 'asc' ? (x, y) => (x.nivel == null ? 1e12 : heatScore(x)) - (y.nivel == null ? 1e12 : heatScore(y))
+    : st.sort === 'aroma' ? (x, y) => ((aromaI(y) ?? -1) - (aromaI(x) ?? -1)) || (heatScore(y) - heatScore(x))
+    : (x, y) => heatScore(y) - heatScore(x);
+  const usePrio = !(VIEW.modo === 'edgar' && st.sort === 'nome');
+  const pr = new Map(a.map(v => [v.id, usePrio ? prio(v) : 0]));
+  a.sort((x, y) => (pr.get(x.id) - pr.get(y.id)) || base(x, y));
   return a;
 }
 
@@ -322,6 +476,7 @@ function opts(key, items){
     if (key === 'trad') return (v.tradicao || []).includes(val);
     if (key === 'pais') return (v.pais || '—') === val;
     if (key === 'esp') return espOf(v) === val;
+    if (key === 'col') return colTest(v, val);
   }).length;
   return items.map(([val, label, style]) => {
     const n = cnt(val), on = st[key].has(val);
@@ -340,6 +495,7 @@ function buildFilters(){
   const ps = [...new Set(V.map(v => v.pais).filter(Boolean))].sort((a, b) => country(a).localeCompare(country(b), LOCALE[lang]));
   $('#fPais').innerHTML = opts('pais', ps.map(p => [p, `${flagImg(p, '')}${esc(country(p))}`, '']).concat([['—', esc(T('no_country')), '']]));
   $('#fEsp').innerHTML = opts('esp', ESPECIES.map(e => [e, e === '*outra' ? esc(espName(e)) : `<i>${esc(e)}</i>`, '']));
+  $('#fCol').innerHTML = opts('col', colOptions().map(([v, k]) => [v, esc(T(k)), '']));
   renderPresets();
   if ($('#q').value.trim() !== st.q) $('#q').value = st.q; $('#fSort').value = st.sort; $('#fFoto').checked = st.foto;
 }
@@ -394,6 +550,7 @@ function activeTags(n){
   [...st.trad].forEach(v => add('trad', v, X(v)));
   [...st.pais].forEach(v => add('pais', v, v === '—' ? T('no_country') : country(v)));
   [...st.esp].forEach(v => add('esp', v, espName(v)));
+  [...st.col].forEach(v => add('col', v, colLabel(v)));
   if (st.foto) add('foto', '', T('photo_tag'));
   if (st.ids.size) add('ids', '', T('id_tag', {n: st.ids.size}));
   $('#active').innerHTML = `<span class="count">${esc(T('count', {n: n, t: V.length}))}</span>` + tags.join('') + (tags.length ? `<button type="button" class="btn ghost" id="limpar2">${esc(T('clear'))}</button>` : '');
@@ -411,10 +568,10 @@ $('#active').addEventListener('click', e => {
 
 /* ================= fichas ================= */
 function card(v){
-  const f = v.fotos && v.fotos[0];
-  const thumb = f
-    ? `<img class="ph-img" src="${esc(f.web)}" alt="" loading="lazy">${v.fotos.length > 1 ? `<span class="nfotos">${esc(T('photos_n', {n: v.fotos.length}))}</span>` : ''}`
-    : `<span class="ph" style="--c:${heatVar(v.nivel)}">${POD}<span>${esc(T('no_photo'))}</span></span>`;
+  const fs = fotosV(v), f = fs[0];
+  const thumb = f && f.src
+    ? `<img class="ph-img" src="${esc(f.src)}" alt="" loading="lazy" decoding="async">${fs.length > 1 ? `<span class="nfotos">${esc(T('photos_n', {n: fs.length}))}</span>` : ''}${VIEW.modo !== 'edgar' && f.data ? `<span class="pdate">${esc(fmtDate(f.data))}</span>` : ''}`
+    : `<span class="ph${f ? ' loading' : ''}" style="--c:${heatVar(v.nivel)}">${POD}<span>${esc(T(f ? 'loading' : 'no_photo'))}</span></span>`;
   const per = (v.aroma?.perfil || []).slice(0, 2).map(pill).join('');
   const q = cart[v.id];
   const foot = v.disponivel === false
@@ -430,15 +587,18 @@ function card(v){
         <span class="meters">${meter(v.nivel, 'heat')}${meter(aromaI(v), 'aroma')}</span>
         <span class="crow"><span class="shu">${shuShort(v)}</span><span class="tag">${esc(T('t_' + v.tipoShu))}</span></span>
         <span class="pills">${per}</span>
+        ${colBadge(v)}
       </span>
     </button>
-    ${ORDERS ? `<div class="cfoot">${foot}</div>` : ''}
+    ${(ORDERS && VIEW.modo === 'edgar') || colBtn(v) ? `<div class="cfoot">${ORDERS && VIEW.modo === 'edgar' ? foot : ''}${colBtn(v)}</div>` : ''}
   </article>`;
 }
 const grid = $('#grid');
 grid.addEventListener('click', e => {
   const a = e.target.closest('[data-add]'); if (a){ addToCart(a.dataset.add, C.quantidadePadrao || 10); return; }
   const c = e.target.closest('[data-cart]'); if (c){ openOrder(); return; }
+  const ca = e.target.closest('[data-coladd]'); if (ca){ addToCol(ca.dataset.coladd); return; }
+  const co = e.target.closest('[data-colopen]'); if (co){ openFicha(co.dataset.colopen, false, true); return; }
   const m = e.target.closest('.cardmain'); if (m) openFicha(m.dataset.id);
 });
 
@@ -495,7 +655,7 @@ function renderPanel(vs){
   const iso = mapSel; vs = vs.slice().sort((a, b) => heatScore(b) - heatScore(a)); let lastLv;
   panel.innerHTML = `<div class="mphead">${flagImg(iso, '')}<h3 id="mpT">${esc(country(iso))}</h3><button type="button" class="iconbtn" id="mpBack" aria-label="${esc(T('map_back'))}">×</button></div>
     <p class="small muted">${esc(vs.length ? Tn('map_n', vs.length, {n: vs.length}) : T('map_zero'))}</p>
-    <ul class="mplist" role="list">${vs.map(v => { const f = v.fotos?.[0], lv = v.nivel ?? null; const head = lv !== lastLv ? `<li class="lvh" style="--c:${heatVar(lv)}"><span class="sw"></span>${esc(lv == null ? T('no_data') : lv + ' · ' + T('h' + lv))}</li>` : ''; lastLv = lv; return `${head}<li><button type="button" data-open="${esc(v.id)}" style="--c:${heatVar(lv)}">${f ? `<img src="${esc(f.web)}" alt="" loading="lazy">` : `<span class="ph" style="--c:${heatVar(lv)}">${POD}</span>`}<span class="t"><b>${esc(nome(v))}</b>${meter(v.nivel, 'heat')}<span class="small">${esc(T('aroma_label'))}: ${esc(aromaI(v) == null ? T('no_data') : T('a' + aromaI(v)))}</span></span></button></li>`; }).join('')}</ul>
+    <ul class="mplist" role="list">${vs.map(v => { const f = foto1(v), lv = v.nivel ?? null; const head = lv !== lastLv ? `<li class="lvh" style="--c:${heatVar(lv)}"><span class="sw"></span>${esc(lv == null ? T('no_data') : lv + ' · ' + T('h' + lv))}</li>` : ''; lastLv = lv; return `${head}<li><button type="button" data-open="${esc(v.id)}" style="--c:${heatVar(lv)}">${f && f.src ? `<img src="${esc(f.src)}" alt="" loading="lazy">` : `<span class="ph" style="--c:${heatVar(lv)}">${POD}</span>`}<span class="t"><b>${esc(nome(v))}</b>${meter(v.nivel, 'heat')}<span class="small">${esc(T('aroma_label'))}: ${esc(aromaI(v) == null ? T('no_data') : T('a' + aromaI(v)))}</span></span></button></li>`; }).join('')}</ul>
     ${vs.length ? `<button type="button" class="btn" id="mpFilter">${esc(T('map_filter'))}</button>` : ''}`;
   panel.setAttribute('aria-labelledby', 'mpT');
   panel.hidden = false; mapCountries.hidden = true;
@@ -609,18 +769,20 @@ chartEl.addEventListener('click', e => { const c = e.target.closest('circle'); i
 chartEl.addEventListener('keydown', e => { const c = e.target.closest('circle'); if (c && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); openFicha(c.dataset.id); } });
 
 /* ================= separadores ================= */
-const TABS = ['fichas', 'mapa', 'regua'];
+const TABS = ['fichas', 'mapa', 'regua', 'comunidade'];
 function showView(v, focus){
-  document.querySelectorAll('.tabs [role=tab]').forEach(t => { const on = t.dataset.v === v; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; if (on && focus) t.focus(); });
+  document.querySelectorAll('.tabs [role=tab]').forEach(t => { const on = t.dataset.v === v; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; if (on && focus) t.focus(); if (on){ const tb = t.parentElement; if (tb.scrollWidth > tb.clientWidth) tb.scrollLeft = Math.max(0, t.offsetLeft - 16); } });
   TABS.forEach(k => { $('#v-' + k).hidden = k !== v; });
   $('#resultados').dataset.view = v;
-  setNav(v);
+  setNav(v === 'comunidade' ? 'col' : v);
+  if (v === 'comunidade'){ renderComunidade(); loadComunidade(); }
 }
 function setNav(v){ document.querySelectorAll('#mbar [data-nav]').forEach(b => b.setAttribute('aria-current', b.dataset.nav === v ? 'true' : 'false')); }
 $('#mbar').addEventListener('click', e => {
   const b = e.target.closest('[data-nav]'); if (!b) return;
   const n = b.dataset.nav, beh = prefs.motion || RED.matches ? 'auto' : 'smooth';
   if (n === 'guia'){ setNav('guia'); $('#guia').scrollIntoView({behavior: beh, block: 'start'}); return; }
+  if (n === 'col'){ if (!CS.perfil){ openPerfil(); return; } if (VIEW.modo !== 'minha') setModo('minha'); showView('comunidade'); $('#resultados').scrollIntoView({behavior: beh, block: 'start'}); return; }
   showView(n); $('#resultados').scrollIntoView({behavior: beh, block: 'start'});
 });
 const tabsEl = document.querySelector('.tabs');
@@ -804,11 +966,13 @@ function careBlock(v){
     <div><dt>${esc(T('care_prec'))}</dt><dd>${esc(T('prec_' + k))}</dd></div>
   </dl>${srcDetails(['wiki_chili', 'nhs_reflux'].concat(v.nivel >= 5 ? ['ns_reaper'] : []))}</section>`;
 }
-function openFicha(id){
+function openFicha(id, keep, toCol){
   const v = byId[id]; if (!v) return;
   if (!dlg.open) lastFocus = document.activeElement;
+  const sc = dlg.scrollTop;
   openId = id;
-  const pics = v.fotos?.length ? v.fotos.map(f => `<img src="${esc(f.web)}" alt="${esc(nome(v))}">`).join('')
+  const pics = VIEW.modo === 'minha' ? fichaPicsMine(v) : VIEW.modo === 'outro' ? fichaPicsOther(v)
+    : v.fotos?.length ? v.fotos.map(f => `<img src="${esc(f.web)}" alt="${esc(nome(v))}">`).join('')
     : `<div class="ph" style="--c:${heatVar(v.nivel)}">${POD}<b>${esc(nome(v))}</b><span>${esc(T('no_photo_long'))}</span></div>`;
   const row = (t, x) => x ? `<div><dt>${esc(T(t))}</dt><dd>${x}</dd></div>` : '';
   const pills = arr => arr && arr.length ? `<span class="pills">${arr.map(x => `<span class="pill">${esc(X(x))}</span>`).join('')}</span>` : '';
@@ -829,7 +993,9 @@ function openFicha(id){
         <div class="blk">${meter(v.nivel, 'heat', true)}<div class="shu">${shuFull(v)} <span class="tag">${esc(T('t_' + v.tipoShu))}</span></div>${v.shuTxt ? `<div class="small muted">${esc(X(v.shuTxt))}</div>` : ''}</div>
         <div class="blk">${meter(a.i, 'aroma', true)}<div class="pills">${(a.perfil || []).map(pill).join('') || `<span class="small muted">${esc(T('profile_none'))}</span>`}</div><div class="small muted">${esc(T('b_' + a.base))}</div></div>
       </div>
-      ${order}
+      ${v.ref && VIEW.modo === 'edgar' ? `<p class="refnote">${esc(T('ref_note'))}</p>` : ''}
+      ${VIEW.modo === 'edgar' ? order : ''}
+      ${COLLECT_OK ? colBlock(v) : ''}
       ${chefBlock(v)}
       ${careBlock(v)}
       <dl>
@@ -840,14 +1006,18 @@ function openFicha(id){
         ${row('d_flavor', esc(X(v.sabor)))}
         ${row('d_look', esc(X(v.aspeto)))}
         ${row('d_origin', esc(X(v.origem)))}
-        ${alts.length ? row('d_alts', `<span class="alts">${alts.map(o => `<button type="button" data-alt="${esc(o.id)}">${o.fotos?.length ? `<img src="${esc(o.fotos[0].web)}" alt="">` : `<span class="dot" style="--c:${heatVar(o.nivel)}"></span>`}${esc(nome(o))}</button>`).join('')}</span>`) : ''}
+        ${alts.length ? row('d_alts', `<span class="alts">${alts.map(o => `<button type="button" data-alt="${esc(o.id)}">${foto1(o) && foto1(o).src ? `<img src="${esc(foto1(o).src)}" alt="">` : `<span class="dot" style="--c:${heatVar(o.nivel)}"></span>`}${esc(nome(o))}</button>`).join('')}</span>`) : ''}
       </dl>
       ${v.nota ? `<div class="note">${esc(X(v.nota))}</div>` : ''}
       ${srcDetails(v.fontes)}
     </div></div>`;
   if (!dlg.open) dlg.showModal();
-  dlg.scrollTop = 0;
+  dlg.scrollTop = keep ? sc : 0;
+  if (toCol){ const b = $('#fBody .colblk'); b && b.scrollIntoView({block: 'start'}); }
+  if (VIEW.modo !== 'edgar') upgradeFichaPics();
+  try { history.replaceState(null, '', '#v-' + id); } catch (e) {}
 }
+dlg.addEventListener('close', () => { if (location.hash.startsWith('#v-')) try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} });
 
 /* ================= encomenda ================= */
 let cart = store.get('cc.encomenda.v1', {});
@@ -995,13 +1165,13 @@ const ICO_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M
 const ICO_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z" fill="currentColor"/></svg>';
 function curRender(announce){
   const n = CURIOS.length; if (!n) return;
-  const [k, fs, vid] = CURIOS[curI], v = byId[vid], f = v && v.fotos && v.fotos[0];
+  const [k, fs, vid] = CURIOS[curI], v = byId[vid], f0 = v && foto1(v), f = f0 && f0.src ? f0 : null;
   const sl = $('#cSlide');
   sl.setAttribute('aria-live', announce ? 'polite' : 'off');
-  sl.innerHTML = `<div class="cfade"><p class="ctxt">${T(k)}</p><div class="cfoot">${v ? `<button type="button" class="linkish" data-open="${esc(v.id)}">${esc(T('cur_photo', {name: nome(v)}))}</button>` : ''}${srcDetails(fs)}</div></div>`;
+  sl.innerHTML = `<div class="cfade"><p class="ctxt">${T(k)}</p><div class="cfoot">${v && f ? `<button type="button" class="linkish" data-open="${esc(v.id)}">${esc(T('cur_photo', {name: nome(v)}))}</button>` : ''}${srcDetails(fs)}</div></div>`;
   const ci = $('#cImg');
-  ci.hidden = !f;
-  if (f){ ci.dataset.open = v.id; ci.style.setProperty('--c', heatVar(v.nivel)); ci.setAttribute('aria-label', T('open_card', {name: nome(v)})); ci.innerHTML = `<img src="${esc(f.web)}" alt="" width="64" height="64">`; }
+  ci.hidden = !f; document.querySelector('.cbox').classList.toggle('noimg', !f);
+  if (f){ ci.dataset.open = v.id; ci.style.setProperty('--c', heatVar(v.nivel)); ci.setAttribute('aria-label', T('open_card', {name: nome(v)})); ci.innerHTML = `<img src="${esc(f.src)}" alt="" width="64" height="64">`; }
   $('#cPos').textContent = `${curI + 1}/${n}`;
   const pb = $('#cPlay'); pb.innerHTML = curPlay ? ICO_PAUSE : ICO_PLAY; pb.setAttribute('aria-label', T(curPlay ? 'cur_pause' : 'cur_play'));
   curBarRestart();
@@ -1031,10 +1201,11 @@ curTick();
 
 /* faixa de fotografias: da mais suave à mais picante */
 function renderRibbon(){
-  const ph = V.filter(v => v.fotos && v.fotos.length && v.nivel != null).sort((x, y) => heatScore(x) - heatScore(y));
+  const ph = V.filter(v => v.nivel != null && foto1(v) && foto1(v).src).sort((x, y) => heatScore(x) - heatScore(y));
+  document.querySelector('.ribbon').hidden = ph.length < 3;
   const N = Math.min(ph.length, 14), pick = [];
   for (let i = 0; i < N; i++) pick.push(ph[Math.round(i * (ph.length - 1) / Math.max(1, N - 1))]);
-  $('#ribbon').innerHTML = [...new Set(pick)].map(v => `<button type="button" data-open="${esc(v.id)}" style="--c:${heatVar(v.nivel)}" aria-label="${esc(T('open_card', {name: nome(v)}))} (${esc(v.nivel + ' · ' + T('h' + v.nivel))})"><span class="rimg"><img src="${esc(v.fotos[0].web)}" alt="" width="72" height="72" loading="lazy"></span><span class="rn">${esc(nome(v))}</span></button>`).join('');
+  $('#ribbon').innerHTML = [...new Set(pick)].map(v => `<button type="button" data-open="${esc(v.id)}" style="--c:${heatVar(v.nivel)}" aria-label="${esc(T('open_card', {name: nome(v)}))} (${esc(v.nivel + ' · ' + T('h' + v.nivel))})"><span class="rimg"><img src="${esc(foto1(v).src)}" alt="" width="72" height="72" loading="lazy"></span><span class="rn">${esc(nome(v))}</span></button>`).join('');
 }
 $('#ribbon').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) openFicha(b.dataset.open); });
 
@@ -1049,8 +1220,7 @@ function buildStatic(){
   $('#locPais').textContent = country('PT');
   idRender();
   $('#fontes').innerHTML = Object.values(D.fontes).sort((a, b) => a[0].localeCompare(b[0], 'pt')).map(([t, u]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join('');
-  $('#stats').innerHTML = [[V.length, 'st_var'], [new Set(V.map(v => v.pais).filter(Boolean)).size, 'st_paises']]
-    .map(([n, k]) => `<div><dt>${esc(T(k))}</dt><dd class="mono">${nf(n)}</dd></div>`).join('');
+  renderStats(); renderModeBar(); renderColBtn();
   const d = new Date(D.atualizado + 'T12:00:00');
   $('#foot').textContent = `${T('updated', {d: new Intl.DateTimeFormat(LOCALE[lang], {dateStyle: 'long'}).format(d)})} ${T('disclaimer')}`;
 }
@@ -1064,22 +1234,421 @@ function update(rebuild = true){
   const l3 = $('#limpar3'); if (l3) l3.addEventListener('click', () => { reset(); update(); });
   activeTags(list.length);
   drawMap(list); dimChart();
+  if (VIEW.modo !== 'edgar') loadThumbs();
 }
 
 /* barra: marca aparece quando o título sai do ecrã */
 const bar = $('#bar');
 new IntersectionObserver(([en]) => bar.classList.toggle('scrolled', !en.isIntersecting), {rootMargin: '-60px 0px 0px 0px'}).observe(document.querySelector('.hero h1'));
 
+/* ================= coleção pessoal e comunidade ================= */
+const ICO_JAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8M9 3v3.2c-2.4.9-4 3.2-4 5.8v6.5A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5V12c0-2.6-1.6-4.9-4-5.8V3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.6 11.2c1.5-.2 2.1 1.1 1.6 2.3-.7 1.6-2.4 3.1-4.7 3.6-.6.1-.8-.4-.4-.7 1.4-1.1 2.1-2.4 2.4-3.8.2-.8.5-1.3 1.1-1.4z" fill="currentColor"/></svg>';
+const ICO_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICO_CAM = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.2h6.8L17 8h3a1 1 0 0 1 1 1v9.2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.4" r="3.4" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+const ICO_GAL = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9.5" r="1.8" fill="currentColor"/><path d="m4 18 5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+const ICO_BIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 12.5h9l1-12.5M10 11v5M14 11v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICO_LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+const ICO_GLOBE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 12h17M12 3.5c2.5 2.4 3.6 5.2 3.6 8.5s-1.1 6.1-3.6 8.5c-2.5-2.4-3.6-5.2-3.6-8.5S9.5 5.9 12 3.5z" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+const fmtDate = s => { if (!s) return ''; try { return new Intl.DateTimeFormat(LOCALE[lang], {dateStyle: 'medium'}).format(new Date(s + 'T12:00:00')); } catch (e) { return s; } };
+const ESTADOS = CS.ESTADOS;
+const estOk = e => ESTADOS.includes(e) ? e : 'sementes';
+const COLLECT_OK = !!CS;
+
+/* nome a mostrar, iniciais e cor do avatar */
+const dispName = p => (p && p.nome) || T('col_anon');
+const initials = p => { const n = (p && p.nome || '').trim(); if (!n) return '?'; const w = n.split(/\s+/); return ((w[0][0] || '') + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase(); };
+const avCor = p => { const n = parseInt(p && p.cor, 10); return n >= 0 && n <= 7 ? n : 0; };
+const avatar = (p, big) => `<span class="avatar${big ? ' big' : ''}" style="--c:var(--av${avCor(p)})" aria-hidden="true">${esc(initials(p))}</span>`;
+
+/* ---------- miniaturas das fotografias da coleção ativa ---------- */
+const PH = new Map();
+let phBusy = false;
+function activeItems(){ return VIEW.modo === 'minha' ? Object.values(CS.itens) : VIEW.modo === 'outro' && VIEW.outro ? Object.values(VIEW.outro.itens) : []; }
+async function loadThumbs(){
+  if (phBusy) return;
+  const need = activeItems().flatMap(it => it.fotos).filter(f => !PH.has(f.id));
+  if (!need.length) return;
+  phBusy = true;
+  try { const m = await CS.urlsFotos(need); need.forEach(f => PH.set(f.id, m[f.id] || '')); }
+  catch (e) { need.forEach(f => PH.set(f.id, '')); }
+  finally { phBusy = false; }
+  refreshAll(false);
+  if (dlg.open && openId) openFicha(openId, true);
+}
+
+/* ---------- vistas: coleção do Edgar, a minha, a de outro colecionador ---------- */
+function setModo(m, outro){
+  VIEW.modo = m; VIEW.outro = m === 'outro' ? outro : null;
+  if (m !== 'outro') store.set('cc.modo', m);
+  document.documentElement.dataset.modo = m;
+  st.col.clear(); st.foto = false;
+  refreshAll(true);
+  loadThumbs();
+}
+function refreshAll(rebuild){
+  renderModeBar(); renderStats(); renderRibbon(); curRender(false); update(rebuild); renderColBtn();
+  if ($('#resultados').dataset.view === 'comunidade') renderComunidade();
+}
+function renderColBtn(){
+  const b = $('#bCol'); if (!b) return;
+  const has = !!CS.perfil;
+  $('#bColLab').textContent = T(has ? 'col_mine' : 'col_start');
+  b.setAttribute('aria-label', T(has ? 'col_mine' : 'col_start') + (has ? ` (${CS.count()})` : ''));
+  const n = $('#bColN'); n.hidden = !has || !CS.count(); n.textContent = CS.count();
+  b.classList.toggle('on', VIEW.modo === 'minha');
+}
+function renderModeBar(){
+  const el = $('#modebar'); if (!el) return;
+  if (VIEW.modo === 'outro'){
+    const p = VIEW.outro.perfil;
+    el.innerHTML = `<div class="viewing">${avatar(p)}<p><span class="muted small">${esc(T('viewing'))}</span><b>${esc(dispName(p))}</b>${p.pais ? `<span class="small">${flagImg(p.pais, '')} ${esc(country(p.pais))}${p.localidade ? ' · ' + esc(p.localidade) : ''}</span>` : ''}</p><button type="button" class="btn" id="mbBack">← ${esc(T('back'))}</button></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="seg modes" role="group" aria-label="${esc(T('col_switch_aria'))}">
+    <button type="button" data-modo="edgar" aria-pressed="${VIEW.modo === 'edgar'}">${esc(T('col_edgar'))}</button>
+    <button type="button" data-modo="minha" aria-pressed="${VIEW.modo === 'minha'}">${ICO_JAR}${esc(T(CS.perfil ? 'col_mine' : 'col_start'))}${CS.perfil && CS.count() ? ` <span class="n">${CS.count()}</span>` : ''}</button>
+  </div>`;
+}
+document.addEventListener('click', e => {
+  const m = e.target.closest('#modebar [data-modo]');
+  if (m){ const v = m.dataset.modo; if (v === 'minha' && !CS.perfil){ openPerfil(); return; } if (v !== VIEW.modo) setModo(v); return; }
+  if (e.target.closest('#mbBack')){ setModo(store.get('cc.modo', 'edgar') === 'minha' && CS.perfil ? 'minha' : 'edgar'); showView('comunidade'); }
+});
+function renderStats(){
+  const lede = $('#lede');
+  if (VIEW.modo === 'edgar'){
+    lede.textContent = T('lede');
+    $('#stats').innerHTML = [[V.filter(v => !v.ref).length, 'st_col'], [V.filter(v => v.ref).length, 'st_ref'], [new Set(V.map(v => v.pais).filter(Boolean)).size, 'st_paises']]
+      .map(([n, k]) => `<div><dt>${esc(T(k))}</dt><dd class="mono">${nf(n)}</dd></div>`).join('');
+    return;
+  }
+  const items = VIEW.modo === 'minha' ? CS.itens : VIEW.outro.itens;
+  const ids = Object.keys(items).filter(id => byId[id]);
+  const nf_ = ids.reduce((s, id) => s + items[id].fotos.length, 0);
+  lede.textContent = VIEW.modo === 'minha' ? T('col_lede') : T('col_lede_other', {name: dispName(VIEW.outro.perfil)});
+  $('#stats').innerHTML = [[ids.length, 'st_incol'], [nf_, 'st_fotos'], [new Set(ids.map(id => byId[id].pais).filter(Boolean)).size, 'st_paises']]
+    .map(([n, k]) => `<div><dt>${esc(T(k))}</dt><dd class="mono">${nf(n)}</dd></div>`).join('');
+}
+
+/* ---------- filtro "Coleção" ---------- */
+function colTest(v, c){
+  if (c === 'edgar') return !v.ref;
+  if (c === 'ref') return !!v.ref;
+  const it = VIEW.modo === 'outro' ? itemDe(v) : CS.item(v.id);
+  if (c === 'mine') return !!it;
+  if (c === 'missing') return !it;
+  if (c === 'troca') return !!(it && it.troca);
+  return !!(it && it.estado === c);
+}
+function colOptions(){
+  if (VIEW.modo === 'edgar') return [['edgar', 'fc_edgar'], ['ref', 'fc_ref']].concat(CS.perfil ? [['mine', 'fc_mine']] : []);
+  if (VIEW.modo === 'minha') return [['mine', 'fc_mine'], ['missing', 'fc_missing']].concat(ESTADOS.map(e => [e, 'est_' + e]), [['troca', 'fc_trade']]);
+  return ESTADOS.map(e => [e, 'est_' + e]).concat([['troca', 'fc_trade']]);
+}
+const colLabel = c => T(({edgar: 'fc_edgar', ref: 'fc_ref', mine: 'fc_mine', missing: 'fc_missing', troca: 'fc_trade'})[c] || 'est_' + c);
+
+/* ---------- botão de coleção nos cartões ---------- */
+function colBtn(v){
+  if (VIEW.modo === 'outro' || !CS.perfil) return '';
+  const it = CS.item(v.id);
+  if (it) return `<button type="button" class="btn colin" data-colopen="${esc(v.id)}" aria-label="${esc(T('col_in') + ': ' + nome(v) + ' · ' + T('est_' + it.estado))}">${ICO_CHECK}<span class="cs"><b>${esc(T('est_' + it.estado))}</b>${it.desde ? `<span class="d">${esc(fmtDate(it.desde))}</span>` : ''}</span></button>`;
+  return `<button type="button" class="btn coladd" data-coladd="${esc(v.id)}" aria-label="${esc(T('col_add_aria', {name: nome(v)}))}">+ ${esc(T('col_add'))}</button>`;
+}
+function colBadge(v){
+  if (VIEW.modo !== 'outro') return '';
+  const it = itemDe(v); if (!it) return '';
+  return `<span class="crow"><span class="estado est-${estOk(it.estado)}">${esc(T('est_' + it.estado))}</span>${it.troca ? `<span class="tag">${esc(T('fc_trade'))}</span>` : ''}</span>`;
+}
+async function addToCol(id, quiet){
+  try {
+    await CS.guardarItem(id, {estado: 'sementes', desde: today()});
+    refreshAll(false);
+    if (!quiet) toastUndo(T('col_added', {name: nome(byId[id])}), async () => { await CS.removerItem(id); refreshAll(false); if (dlg.open && openId === id) openFicha(id, true); });
+  } catch (e){ console.error(e); toast(T('col_err')); }
+}
+function toastUndo(msg, undo){
+  const t = $('#toast');
+  t.innerHTML = `<span>${esc(msg)}</span> <button type="button" class="tbtn">${esc(T('col_undo'))}</button>`;
+  t.classList.add('show', 'act'); clearTimeout(toast._t);
+  t.querySelector('.tbtn').onclick = () => { t.classList.remove('show', 'act'); undo(); };
+  toast._t = setTimeout(() => t.classList.remove('show', 'act'), 5000);
+}
+
+/* ---------- bloco "A minha coleção" na ficha ---------- */
+function fichaPicsMine(v){
+  const it = CS.item(v.id);
+  const add = `<div class="addph"><label class="btn primary" for="phCam">${ICO_CAM}${esc(T('col_photo_cam'))}</label><label class="btn" for="phGal">${ICO_GAL}${esc(T('col_photo_add'))}</label>
+    <input type="file" id="phCam" class="vh" accept="image/*" capture="environment"><input type="file" id="phGal" class="vh" accept="image/*" multiple>
+    <p class="small muted">${esc(T('col_photo_gps'))}</p></div>`;
+  if (!it || !it.fotos.length){
+    return `<div class="ph" style="--c:${heatVar(v.nivel)}">${POD}<b>${esc(nome(v))}</b><span>${esc(T(it ? 'col_first_photo' : 'no_photo_long'))}</span></div>${it ? add : ''}`;
+  }
+  return it.fotos.map(f => `<figure class="myph"><img data-fid="${esc(f.id)}" src="${esc(PH.get(f.id) || '')}" alt="${esc(nome(v) + (f.data ? ' · ' + fmtDate(f.data) : ''))}">
+      <figcaption><label><span class="vh">${esc(T('col_photo_date'))}</span><input type="date" data-phdate="${esc(f.id)}" value="${esc(f.data || '')}" max="${today()}"></label>
+      <button type="button" class="iconbtn" data-phdel="${esc(f.id)}" aria-label="${esc(T('col_photo_del'))}">${ICO_BIN}</button></figcaption></figure>`).join('') + (it.fotos.length < CS.MAX_FOTOS ? add : `<p class="small muted addph">${esc(T('col_photo_max', {n: CS.MAX_FOTOS}))}</p>`);
+}
+function fichaPicsOther(v){
+  const it = itemDe(v);
+  if (!it || !it.fotos.length) return `<div class="ph" style="--c:${heatVar(v.nivel)}">${POD}<b>${esc(nome(v))}</b><span>${esc(T('no_photo_long'))}</span></div>`;
+  return it.fotos.map(f => `<figure class="myph"><img data-fid="${esc(f.id)}" src="${esc(PH.get(f.id) || '')}" alt="${esc(nome(v))}">${f.data ? `<figcaption class="small">${esc(fmtDate(f.data))}</figcaption>` : ''}</figure>`).join('');
+}
+function colBlock(v){
+  if (VIEW.modo === 'outro'){
+    const it = itemDe(v); if (!it) return '';
+    return `<section class="colblk ro" aria-labelledby="colT"><h3 id="colT">${esc(T('col_of', {name: dispName(VIEW.outro.perfil)}))}</h3>
+      <p><span class="estado est-${estOk(it.estado)}">${esc(T('est_' + it.estado))}</span>${it.desde ? ` · ${esc(T('col_since'))} ${esc(fmtDate(it.desde))}` : ''}${it.troca ? ` · <b>${esc(T('fc_trade'))}</b>` : ''}</p>
+      ${it.nota ? `<p class="note">${esc(it.nota)}</p>` : ''}</section>`;
+  }
+  if (!CS.perfil){
+    return `<section class="colblk cta"><p>${esc(T('col_cta'))}</p><button type="button" class="btn primary" data-colstart>${ICO_JAR}${esc(T('col_start'))}</button></section>`;
+  }
+  const it = CS.item(v.id);
+  if (!it) return `<section class="colblk cta"><button type="button" class="btn primary" data-coladd="${esc(v.id)}">+ ${esc(T('col_add_long'))}</button></section>`;
+  return `<section class="colblk" aria-labelledby="colT">
+    <h3 id="colT">${ICO_JAR}${esc(T('col_mine'))}</h3>
+    <div class="seg colst" role="group" aria-label="${esc(T('col_state'))}">${ESTADOS.map(e => `<button type="button" data-est="${e}" aria-pressed="${it.estado === e}">${esc(T('est_' + e))}</button>`).join('')}</div>
+    <div class="colrow"><label class="fld">${esc(T('col_since'))}<input type="date" id="colDesde" value="${esc(it.desde || '')}" max="${today()}"></label>
+      <label class="switch"><input type="checkbox" id="colTroca" ${it.troca ? 'checked' : ''}><span>${esc(T('col_trade'))}</span></label></div>
+    <label class="fld">${esc(T('col_note'))}<textarea id="colNota" maxlength="500" rows="3" placeholder="${esc(T('col_note_ph'))}">${esc(it.nota || '')}</textarea></label>
+    ${VIEW.modo === 'edgar' ? `<button type="button" class="btn" data-gomine>${esc(T('col_see_mine'))}</button>` : ''}
+    <button type="button" class="btn ghost" data-colrm>${esc(T('col_remove'))}</button>
+  </section>`;
+}
+async function upgradeFichaPics(){
+  for (const img of document.querySelectorAll('#fBody img[data-fid]')){
+    const it = VIEW.modo === 'outro' ? itemDe(byId[openId]) : CS.item(openId);
+    const f = it && it.fotos.find(x => x.id === img.dataset.fid); if (!f) continue;
+    try { const u = await CS.urlFoto(f, true); if (u && document.contains(img)) img.src = u; } catch (e) {}
+  }
+}
+async function handlePhotos(files){
+  const id = openId; if (!id || !files || !files.length) return;
+  for (const f of [...files].slice(0, CS.MAX_FOTOS)){
+    try { await CS.juntarFoto(id, f); }
+    catch (e){ console.error(e); toast(T(e && e.message === 'max' ? 'col_photo_max' : 'col_photo_err', {n: CS.MAX_FOTOS})); break; }
+  }
+  await loadThumbs(); refreshAll(false); if (dlg.open && openId === id) openFicha(id, true);
+  toast(T('col_saved'));
+}
+$('#fBody').addEventListener('change', async e => {
+  const t = e.target, id = openId; if (!id) return;
+  try {
+    if (t.id === 'phCam' || t.id === 'phGal'){ await handlePhotos(t.files); t.value = ''; return; }
+    if (t.id === 'colDesde'){ await CS.guardarItem(id, {desde: t.value || null}); refreshAll(false); toast(T('col_saved')); }
+    else if (t.id === 'colTroca'){ await CS.guardarItem(id, {troca: t.checked}); refreshAll(false); toast(T('col_saved')); }
+    else if (t.id === 'colNota'){ await CS.guardarItem(id, {nota: t.value}); toast(T('col_saved')); }
+    else if (t.dataset.phdate){ await CS.alterarFoto(id, t.dataset.phdate, {data: t.value || null}); toast(T('col_saved')); }
+  } catch (err){ console.error(err); toast(T('col_err')); }
+});
+$('#fBody').addEventListener('click', async e => {
+  const id = openId; if (!id) return;
+  const est = e.target.closest('[data-est]');
+  if (est){ try { await CS.guardarItem(id, {estado: est.dataset.est}); refreshAll(false); openFicha(id, true); const b = $(`#fBody [data-est="${est.dataset.est}"]`); b && b.focus(); } catch (err){ toast(T('col_err')); } return; }
+  const add = e.target.closest('[data-coladd]');
+  if (add){ await addToCol(add.dataset.coladd, true); openFicha(id, true); const b = $('#fBody [data-est]'); b && b.focus(); toast(T('col_added', {name: nome(byId[id])})); return; }
+  if (e.target.closest('[data-colstart]')){ dlg.close(); openPerfil(); return; }
+  if (e.target.closest('[data-gomine]')){ dlg.close(); setModo('minha'); openFicha(id); return; }
+  if (e.target.closest('[data-colrm]')){
+    if (!confirm(T('col_remove_confirm', {name: nome(byId[id])}))) return;
+    try { await CS.removerItem(id); refreshAll(false); openFicha(id, true); toast(T('col_removed')); } catch (err){ toast(T('col_err')); }
+    return;
+  }
+  const del = e.target.closest('[data-phdel]');
+  if (del){
+    if (!confirm(T('col_photo_del_confirm'))) return;
+    try { await CS.removerFoto(id, del.dataset.phdel); PH.delete(del.dataset.phdel); refreshAll(false); openFicha(id, true); } catch (err){ toast(T('col_err')); }
+  }
+});
+
+/* ---------- perfil: criar, editar, conta, dados ---------- */
+const pdlg = $('#perfil');
+let pfState = {etapa: 'form', email: ''};
+function countryOptions(sel){
+  const isos = [...new Set(M.paises.map(p => p.iso).filter(Boolean).concat(['PT']))].sort((a, b) => country(a).localeCompare(country(b), LOCALE[lang]));
+  return `<option value="">${esc(T('pf_country_none'))}</option>` + isos.map(i => `<option value="${i}" ${i === sel ? 'selected' : ''}>${esc(country(i))}</option>`).join('');
+}
+function renderPerfil(){
+  const p = CS.perfil || {cor: Math.floor(Math.random() * 8)}, novo = !CS.perfil, online = CS.mode === 'online';
+  $('#pTitulo').textContent = T(novo ? 'pf_title_new' : 'pf_title');
+  const acct = !CS.online ? '' : online
+    ? `<section class="pfsec"><h3>${esc(T('pf_account_t'))}</h3><p class="small">${esc(T('pf_where_online', {email: CS.email || ''}))}</p>
+        ${CS.hasLocalData() ? `<div class="note small">${esc(T('pf_migrate'))} <button type="button" class="btn" id="pfMigrate">${esc(T('pf_migrate_btn'))}</button></div>` : ''}
+        <button type="button" class="btn" id="pfOut">${esc(T('pf_signout'))}</button></section>`
+    : `<section class="pfsec" id="pfAcct"><h3>${esc(T('pf_account_t'))}</h3><p class="small">${esc(T('pf_account_p'))}</p>
+        ${pfState.etapa === 'codigo'
+          ? `<p class="small" role="status">${esc(T('pf_sent', {email: pfState.email}))}</p><div class="frow"><label class="fld">${esc(T('pf_code'))}<input id="pfCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10"></label><button type="button" class="btn primary" id="pfVerify">${esc(T('pf_verify'))}</button></div><button type="button" class="btn ghost" id="pfBack">${esc(T('back'))}</button>`
+          : `<div class="frow"><label class="fld">${esc(T('pf_email'))}<input id="pfEmail" type="email" autocomplete="email" value="${esc(pfState.email)}"></label><button type="button" class="btn" id="pfSend">${esc(T('pf_send'))}</button></div>`}
+        <p class="small err" id="pfAcctErr" role="alert"></p></section>`;
+  const pub = !!p.publico, hasData = !!(p.nome || p.pais || p.localidade || p.bio || p.instagram);
+  $('#pBody').innerHTML = `
+    <p>${esc(T('pf_intro'))}</p>
+    <form id="pfForm" novalidate>
+      <fieldset class="fld priv"><legend>${esc(T('pf_priv_t'))}</legend>
+        <label class="radio"><input type="radio" name="pfPub" value="0" ${!pub ? 'checked' : ''}>${ICO_LOCK}<span><b>${esc(T('pf_private'))}</b><span class="small muted">${esc(T('pf_private_d'))}</span></span></label>
+        <label class="radio"><input type="radio" name="pfPub" value="1" ${pub ? 'checked' : ''} ${online ? '' : 'disabled'}>${ICO_GLOBE}<span><b>${esc(T('pf_public'))}</b><span class="small muted">${esc(T(online ? 'pf_public_d' : CS.online ? 'pf_public_need' : 'pf_public_off'))}</span></span></label>
+        <label class="switch consent" ${pub ? '' : 'hidden'}><input type="checkbox" id="pfConsent" ${pub ? 'checked' : ''}><span class="small">${esc(T('pf_public_consent'))}</span></label>
+      </fieldset>
+      <details class="pfdata" ${pub || hasData ? 'open' : ''}><summary>${esc(T('pf_fields_t'))}</summary><div class="pfdata-in">
+      <div class="pfhead">${avatar(p, true)}<div class="fld grow"><label for="pfNome">${esc(T('pf_name'))}</label><input id="pfNome" maxlength="40" autocomplete="nickname" placeholder="${esc(T('pf_name_ph'))}" value="${esc(p.nome || '')}"></div></div>
+      <fieldset class="fld"><legend>${esc(T('pf_color'))}</legend><div class="swatches">${[0,1,2,3,4,5,6,7].map(i => `<label><input type="radio" name="pfCor" value="${i}" ${i === (p.cor || 0) ? 'checked' : ''}><span style="--c:var(--av${i})"><span class="vh">${i + 1}</span></span></label>`).join('')}</div></fieldset>
+      <div class="frow"><label class="fld">${esc(T('pf_country'))}<select id="pfPais">${countryOptions(p.pais)}</select></label>
+        <label class="fld">${esc(T('pf_place'))}<input id="pfLocal" maxlength="60" value="${esc(p.localidade || '')}"></label></div>
+      <label class="fld">${esc(T('pf_bio'))}<textarea id="pfBio" maxlength="280" rows="2">${esc(p.bio || '')}</textarea></label>
+      <label class="fld">${esc(T('pf_ig'))}<span class="igwrap"><span aria-hidden="true">@</span><input id="pfIg" maxlength="31" autocapitalize="off" spellcheck="false" value="${esc(p.instagram || '')}"></span></label>
+      </div></details>
+      ${online ? '' : `<p class="small muted">${esc(T('pf_where_local'))}</p>`}
+      <p class="small err" id="pfErr" role="alert"></p>
+      <button type="submit" class="btn primary">${esc(T(novo ? 'pf_start' : 'pf_save'))}</button>
+    </form>
+    ${acct}
+    ${novo ? '' : `<section class="pfsec"><h3>${esc(T('pf_data_t'))}</h3><div class="frow fwrap">
+      <button type="button" class="btn" id="pfExport">${esc(T('pf_export'))}</button>
+      <label class="btn" for="pfImport">${esc(T('pf_import'))}</label><input type="file" id="pfImport" class="vh" accept="application/json,.json">
+      <button type="button" class="btn danger" id="pfDelete">${esc(T(online ? 'pf_delete_online' : 'pf_delete_local'))}</button></div></section>`}
+    <p><button type="button" class="linkish" id="pfPriv">${esc(T('pf_privacy_link'))}</button></p>`;
+}
+function openPerfil(){
+  if (!pdlg.open){ lastFocus = document.activeElement; }
+  pfState = {etapa: 'form', email: CS.email || ''};
+  renderPerfil(); if (!pdlg.open) pdlg.showModal();
+  setTimeout(() => { const n = pdlg.querySelector('input[name=pfPub]:checked'); n && n.focus(); }, 30);
+}
+$('#bCol').addEventListener('click', () => { if (!CS.perfil){ openPerfil(); return; } if (VIEW.modo !== 'minha') setModo('minha'); $('#resultados').scrollIntoView({behavior: prefs.motion || RED.matches ? 'auto' : 'smooth', block: 'start'}); });
+$('#pFechar').addEventListener('click', () => pdlg.close());
+pdlg.addEventListener('close', () => { if (lastFocus && document.contains(lastFocus)) lastFocus.focus(); });
+pdlg.addEventListener('click', e => { if (e.target === pdlg) pdlg.close(); });
+pdlg.addEventListener('change', async e => {
+  const t = e.target;
+  if (t.name === 'pfPub'){ const c = $('#pfForm .consent'); c.hidden = t.value !== '1'; if (t.value === '1'){ $('#pfForm .pfdata').open = true; $('#pfConsent').focus(); } }
+  if (t.name === 'pfCor'){ const a = $('#pBody .avatar'); a.style.setProperty('--c', `var(--av${t.value})`); }
+  if (t.id === 'pfNome'){ $('#pBody .avatar').textContent = initials({nome: t.value}); }
+  if (t.id === 'pfImport' && t.files[0]){
+    try { if (t.files[0].size > 80 * 1024 * 1024) throw new Error('grande'); const n = await CS.importar(JSON.parse(await t.files[0].text())); PH.clear(); toast(T('pf_imported', {n})); refreshAll(true); loadThumbs(); renderPerfil(); }
+    catch (err){ console.error(err); toast(T('pf_import_err')); }
+    t.value = '';
+  }
+});
+pdlg.addEventListener('input', e => { if (e.target.id === 'pfNome') $('#pBody .avatar').textContent = initials({nome: e.target.value}); });
+pdlg.addEventListener('submit', async e => {
+  e.preventDefault();
+  const pub = (pdlg.querySelector('input[name=pfPub]:checked') || {}).value === '1';
+  if (pub && !$('#pfConsent').checked){ $('#pfErr').textContent = T('pf_err_consent'); $('#pfConsent').focus(); return; }
+  const ig = $('#pfIg').value.trim().replace(/^@/, '');
+  if (ig && !/^[A-Za-z0-9._]{1,30}$/.test(ig)){ $('#pfErr').textContent = T('pf_err_ig'); $('#pfIg').focus(); return; }
+  const novo = !CS.perfil;
+  try {
+    await CS.guardarPerfil({nome: $('#pfNome').value, pais: $('#pfPais').value, localidade: $('#pfLocal').value, bio: $('#pfBio').value, instagram: ig,
+      cor: +(pdlg.querySelector('input[name=pfCor]:checked') || {}).value || 0, publico: pub && CS.mode === 'online'});
+    pdlg.close(); toast(T(novo ? 'pf_created' : 'col_saved'));
+    if (novo || VIEW.modo !== 'minha') setModo('minha'); else refreshAll(false);
+  } catch (err){ console.error(err); $('#pfErr').textContent = T('col_err'); }
+});
+pdlg.addEventListener('click', async e => {
+  const t = e.target.closest('button'); if (!t) return;
+  const err = m => { const x = $('#pfAcctErr'); if (x) x.textContent = m; };
+  try {
+    if (t.id === 'pfSend'){
+      const em = $('#pfEmail').value.trim(); pfState.email = em;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){ err(T('pf_err_email')); $('#pfEmail').focus(); return; }
+      t.disabled = true; await CS.enviarCodigo(em); pfState.etapa = 'codigo'; renderPerfil(); $('#pfCode').focus();
+    } else if (t.id === 'pfVerify'){
+      t.disabled = true; await CS.confirmarCodigo(pfState.email, $('#pfCode').value); pfState.etapa = 'form'; PH.clear(); renderPerfil(); refreshAll(true); loadThumbs(); toast(T('pf_signed_in'));
+    } else if (t.id === 'pfBack'){ pfState.etapa = 'form'; renderPerfil(); }
+    else if (t.id === 'pfOut'){ await CS.sair(); PH.clear(); renderPerfil(); refreshAll(true); loadThumbs(); }
+    else if (t.id === 'pfMigrate'){ t.disabled = true; const n = await CS.enviarLocalParaConta(); PH.clear(); toast(T('pf_migrated', {n})); renderPerfil(); refreshAll(true); loadThumbs(); }
+    else if (t.id === 'pfExport'){
+      t.disabled = true; const data = await CS.exportar(true); t.disabled = false;
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type: 'application/json'}));
+      a.download = `colecao-chili-${today()}.json`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    } else if (t.id === 'pfDelete'){
+      if (!confirm(T('pf_delete_confirm'))) return;
+      await CS.apagarTudo(); PH.clear(); pdlg.close(); setModo('edgar'); toast(T('pf_deleted'));
+    } else if (t.id === 'pfPriv'){ openPriv(); }
+  } catch (ex){
+    console.error(ex); t.disabled = false;
+    if (t.id === 'pfSend') err(T('pf_err_send')); else if (t.id === 'pfVerify') err(T('pf_err_code')); else toast(T('col_err'));
+  }
+});
+pdlg.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'pfEmail'){ e.preventDefault(); $('#pfSend').click(); } if (e.key === 'Enter' && e.target.id === 'pfCode'){ e.preventDefault(); $('#pfVerify').click(); } });
+
+/* ---------- privacidade ---------- */
+const vdlg = $('#privacidade');
+function openPriv(){ $('#vBody').innerHTML = T('pv_html', {email: C.email || 'jmns.santos@gmail.com', regiao: !(C.comunidade && C.comunidade.regiao) || C.comunidade.regiao === 'UE' ? T('pv_region_eu') : C.comunidade.regiao}); vdlg.showModal(); }
+$('#vFechar').addEventListener('click', () => vdlg.close());
+vdlg.addEventListener('click', e => { if (e.target === vdlg) vdlg.close(); });
+document.addEventListener('click', e => { if (e.target.closest('[data-priv]')){ e.preventDefault(); openPriv(); } });
+
+/* ---------- comunidade ---------- */
+let COMM = {estado: 'idle', lista: [], q: '', t: 0};
+async function loadComunidade(force){
+  if (!CS.online) return;
+  if (!force && COMM.estado === 'ok' && Date.now() - COMM.t < 60000) return;
+  COMM.estado = 'loading'; renderComunidade();
+  try { COMM.lista = await CS.colecionadores(); COMM.estado = 'ok'; COMM.t = Date.now(); }
+  catch (e){ console.error(e); COMM.estado = 'err'; }
+  renderComunidade();
+}
+function renderComunidade(){
+  const el = $('#comm'); if (!el) return;
+  const p = CS.perfil, online = CS.mode === 'online';
+  const me = !p ? `<div class="mecard cta"><p>${esc(T('comm_cta'))}</p><button type="button" class="btn primary" data-colstart>${ICO_JAR}${esc(T('col_start'))}</button></div>`
+    : `<div class="mecard">${avatar(p, true)}<div><b>${esc(dispName(p))}</b><p class="small">${p.publico ? ICO_GLOBE + esc(T('comm_public_you')) : ICO_LOCK + esc(T('comm_private_you'))}</p>
+       <p class="small muted">${esc(Tn('col_n', CS.count(), {n: CS.count()}))}</p></div>
+       <div class="frow fwrap"><button type="button" class="btn" data-modo-go="minha">${esc(T('col_see_mine'))}</button><button type="button" class="btn" data-perfil>${esc(T('pf_title'))}</button></div></div>`;
+  let body = '';
+  if (!CS.online) body = `<p class="note">${esc(T('comm_off'))}</p>`;
+  else if (COMM.estado === 'loading' || COMM.estado === 'idle') body = `<p class="muted" role="status">${esc(T('comm_loading'))}</p>`;
+  else if (COMM.estado === 'err') body = `<p class="note" role="alert">${esc(T('comm_err'))} <button type="button" class="btn" data-commreload>${esc(T('retry'))}</button></p>`;
+  else {
+    const q = norm(COMM.q);
+    const lista = COMM.lista.filter(c => !q || norm([c.perfil.nome, c.perfil.localidade, c.perfil.pais && country(c.perfil.pais)].join(' ')).includes(q));
+    const tops = {};
+    COMM.lista.forEach(c => Object.keys(c.itens).forEach(id => { if (byId[id] && c.itens[id].estado !== 'quero') tops[id] = (tops[id] || 0) + 1; }));
+    const top = Object.entries(tops).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    body = `${!online ? `<p class="note">${esc(T('comm_join'))} <button type="button" class="btn" data-perfil>${esc(T('comm_signin'))}</button></p>` : ''}
+      <label class="search commq"><span class="vh">${esc(T('comm_search'))}</span><input id="commQ" type="search" placeholder="${esc(T('comm_search'))}" value="${esc(COMM.q)}"></label>
+      ${COMM.lista.length ? `<ul class="collist" role="list">${lista.map(c => {
+        const ids = Object.keys(c.itens).filter(id => byId[id]); const tr = ids.filter(id => c.itens[id].troca).length;
+        return `<li><button type="button" class="colcard" data-ver="${esc(c.id)}">${avatar(c.perfil)}<span class="cc-b"><b>${esc(dispName(c.perfil))}${c.eu ? ` <span class="tag">${esc(T('comm_you'))}</span>` : ''}</b>
+          <span class="small">${c.perfil.pais ? flagImg(c.perfil.pais, '') + ' ' + esc(country(c.perfil.pais)) : ''}${c.perfil.localidade ? ' · ' + esc(c.perfil.localidade) : ''}</span>
+          <span class="small muted">${esc(Tn('col_n', ids.length, {n: ids.length}))}${tr ? ' · ' + esc(T('comm_trade_n', {n: tr})) : ''}</span>
+          ${c.perfil.bio ? `<span class="small bio">${esc(c.perfil.bio)}</span>` : ''}</span></button></li>`; }).join('')}</ul>`
+        : `<p class="muted">${esc(T('comm_empty'))}</p>`}
+      ${top.length ? `<h3>${esc(T('comm_top'))}</h3><ol class="toplist">${top.map(([id, n]) => `<li><button type="button" data-open="${esc(id)}"><span>${esc(nome(byId[id]))}</span><span class="small muted">${esc(Tn('comm_n_col', n, {n}))}</span></button></li>`).join('')}</ol>` : ''}`;
+  }
+  el.innerHTML = `<div class="commhead"><h2>${esc(T('comm_t'))}</h2><p>${esc(T('comm_intro'))} <button type="button" class="linkish" data-priv>${esc(T('pf_privacy_link'))}</button></p></div>${me}${body}`;
+}
+$('#comm').addEventListener('click', e => {
+  if (e.target.closest('[data-colstart]') || e.target.closest('[data-perfil]')){ openPerfil(); return; }
+  if (e.target.closest('[data-commreload]')){ loadComunidade(true); return; }
+  const g = e.target.closest('[data-modo-go]'); if (g){ setModo(g.dataset.modoGo); showView('fichas'); return; }
+  const o = e.target.closest('[data-open]'); if (o){ openFicha(o.dataset.open); return; }
+  const v = e.target.closest('[data-ver]');
+  if (v){
+    const c = COMM.lista.find(x => x.id === v.dataset.ver); if (!c) return;
+    if (c.eu){ setModo('minha'); showView('fichas'); return; }
+    setModo('outro', {id: c.id, perfil: c.perfil, itens: c.itens}); showView('fichas'); $('#resultados').scrollIntoView({block: 'start'});
+  }
+});
+$('#comm').addEventListener('input', e => { if (e.target.id === 'commQ'){ COMM.q = e.target.value; const pos = e.target.selectionStart; renderComunidade(); const q = $('#commQ'); q.focus(); q.setSelectionRange(pos, pos); } });
+
 /* ================= arranque ================= */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !/^(localhost|127\.)/.test(location.hostname) || (navigator.serviceWorker && location.search.includes('sw=1'))) { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {} }
 applyPrefs(); saveCart();
 const saved = store.get('cc.lang', null);
 const nav = (navigator.language || 'pt').slice(0, 2).toLowerCase();
 const first = saved || (LANGS.some(l => l[0] === nav) ? nav : 'pt');
-setLang(first, !!saved).then(() => {
+const boot = CS ? CS.init().catch(e => console.error(e)) : Promise.resolve();
+CS && CS.on(what => { if (what === 'sessao' || what === 'apagado'){ PH.clear(); if (!CS.perfil && VIEW.modo === 'minha') VIEW.modo = 'edgar'; if (booted) refreshAll(true); } });
+boot.then(() => { if (CS && CS.perfil && store.get('cc.modo', 'edgar') === 'minha'){ VIEW.modo = 'minha'; document.documentElement.dataset.modo = 'minha'; } return setLang(first, !!saved); }).then(() => {
+  if (VIEW.modo !== 'edgar') loadThumbs();
   const h = (location.hash || '').slice(1);
   if (TABS.includes(h)) showView(h);
   else if (h === 'identificar') openIdent();
   else if (h.startsWith('v-') && byId[h.slice(2)]) openFicha(h.slice(2));
   else if (h === 'encomenda') openOrder();
+  else if (h === 'colecao') CS && CS.perfil ? setModo('minha') : openPerfil();
+  else if (h === 'comunidade') showView('comunidade');
 });
 })();

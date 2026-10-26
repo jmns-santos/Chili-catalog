@@ -20,6 +20,17 @@ window.CONFIG = {
   /* País pré-preenchido no formulário */
   paisPadrao: 'Portugal',
 
+  /* Comunidade de colecionadores (Supabase). Enquanto url e chave estiverem vazios,
+     cada pessoa guarda a coleção só no próprio aparelho. Instruções: FERRAMENTAS-SITE/COMUNIDADE-SUPABASE.md
+     url:   Project URL (Settings → API), ex.: 'https://abcdefghijkl.supabase.co'
+     chave: chave pública "anon" / "publishable" (nunca a chave secreta "service_role")
+     regiao: onde ficam os dados, para o texto de privacidade */
+  comunidade: {
+    url: '',
+    chave: '',
+    regiao: 'UE'   /* 'UE' = União Europeia (escolher a região Frankfurt ao criar o projeto) */
+  },
+
   /* Línguas disponíveis (código, bandeira, nome próprio) */
   linguas: [
     ['pt', 'pt', 'Português'],
