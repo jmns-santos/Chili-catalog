@@ -1,7 +1,7 @@
 /* CATÁLOGO CHILI · funcionamento sem rede.
    Rede primeiro (o site está sempre atualizado quando há ligação); sem rede, usa a última cópia guardada.
    Só guarda ficheiros deste site; a comunidade online (Supabase) nunca passa por aqui. */
-const CACHE = 'cc-v10';
+const CACHE = 'cc-v11';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
