@@ -358,7 +358,7 @@ setupMenu($('#bA11y'), $('#pA11y'));
 
 /* ================= línguas ================= */
 const LANGS = C.linguas || [['pt','pt','Português']];
-const VER = '9';
+const VER = '10';
 let booted = false;
 function loadLang(code){
   return new Promise(res => {
