@@ -1,10 +1,11 @@
 /* CATÁLOGO CHILI · funcionamento sem rede.
    Rede primeiro (o site está sempre atualizado quando há ligação); sem rede, usa a última cópia guardada.
    Só guarda ficheiros deste site; a comunidade online (Supabase) nunca passa por aqui. */
-const CACHE = 'cc-v11';
+const CACHE = 'cc-v12';
+const CACHE_MOD = 'cc-modelos-1'; /* mudar quando mudarem os modelos ou o motor */
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== CACHE_MOD).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', e => {
   const r = e.request, u = new URL(r.url);
@@ -12,6 +13,11 @@ self.addEventListener('fetch', e => {
   /* a página guarda-se sempre com o endereço limpo (sem ?code= nem outros parâmetros da entrada por email) */
   const home = new URL('./', self.registration.scope).href;
   const key = r.mode === 'navigate' ? home : r;
+  /* motor e modelos do reconhecimento (≈20 MB, nunca mudam de conteúdo sem mudar de nome): cache primeiro */
+  if (/\/assets\/(modelos|vendor\/ort)\//.test(u.pathname)){
+    e.respondWith(caches.open(CACHE_MOD).then(c => c.match(r).then(m => m || fetch(r).then(res => { if (res.ok && res.type === 'basic') c.put(r, res.clone()).catch(() => {}); return res; }))));
+    return;
+  }
   e.respondWith(fetch(r).then(res => {
     if (res.ok && res.type === 'basic'){ const copy = res.clone(); caches.open(CACHE).then(c => c.put(key, copy)).catch(() => {}); }
     return res;

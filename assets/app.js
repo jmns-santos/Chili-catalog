@@ -51,7 +51,10 @@ const PT = {
   tab_id:'Identificar', nav_id:'Identificar', id_t:'Identificar pela fotografia',
   id_help:'Fotografe o fruto inteiro, sozinho e bem iluminado, sobre uma superfície lisa e de cor neutra (bancada clara, tábua branca, prato). O fruto deve ocupar boa parte da imagem.',
   id_cam:'Tirar fotografia', id_gal:'Escolher da galeria', id_privacy:'A fotografia não sai do seu aparelho: é analisada no navegador e não é guardada nem enviada.',
-  id_note:'Experimental. Compara a cor e a forma do fruto com as {n} fotografias do catálogo. Muitas variedades parecem-se e a mesma muda de cor ao amadurecer, por isso o resultado é uma sugestão: confirme sempre na ficha. Variedades sem fotografia não entram na comparação.',
+  id_note:'Compara a forma, a textura e a cor do fruto com as {n} fotografias do catálogo, com uma rede neuronal que corre no próprio aparelho. Muitas variedades parecem-se e a mesma muda de cor ao amadurecer, por isso o resultado é uma sugestão: confirme sempre na ficha. Variedades sem fotografia não entram na comparação.',
+  id_loading:'A preparar o reconhecimento: {p}% (só da primeira vez, cerca de {mb} MB; depois fica guardado no aparelho).', id_ready:'Reconhecimento pronto.',
+  id_fallback:'Este navegador não conseguiu carregar o reconhecimento completo; é usada a comparação simples de cor e forma, menos fiável.',
+  id_low:'Nenhuma fotografia do catálogo se parece muito com esta. Pode ser uma variedade ainda sem fotografia, ou a imagem pode estar pouco nítida.',
   id_working:'A analisar…', id_res:'Mais parecidas', id_sim:'semelhança', id_show:'Mostrar estas no catálogo', id_warn:'Não foi possível separar bem o fruto do fundo. Tente sobre uma superfície lisa e neutra, com o fruto a ocupar boa parte da imagem.',
   id_err:'Não foi possível ler esta imagem.', id_prev:'Zona analisada (o resto foi considerado fundo)', id_tag:'Identificação: {n} sugestões', id_empty:'Ainda não há fotografia. Os resultados aparecem aqui.',
   cur_t:'Curiosidades',
@@ -358,7 +361,7 @@ setupMenu($('#bA11y'), $('#pA11y'));
 
 /* ================= línguas ================= */
 const LANGS = C.linguas || [['pt','pt','Português']];
-const VER = '11';
+const VER = '12';
 let booted = false;
 function loadLang(code){
   return new Promise(res => {
@@ -874,32 +877,70 @@ function idPreview(sig){
   const c = $('#idCanvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(src, 0, 0);
   $('#idPrev').hidden = false;
 }
+/* reconhecimento principal (assets/reconhecer.js): modelos no próprio aparelho; o método acima fica de reserva */
+const REC = window.Reconhecer, ID_LOW = 0.82;
+let idPrep = null, idProg = 0;
+function idStatus(){
+  const el = $('#idState'); if (!el || !REC) return;
+  const s = REC.estado();
+  el.hidden = s === 'idle';
+  el.textContent = s === 'ready' ? T('id_ready') : s === 'failed' ? T('id_fallback') : T('id_loading', {p: Math.round(idProg * 100), mb: REC.mb()});
+}
+function idPrepare(){
+  if (!REC) return null;
+  /* progresso de 10 em 10 %, para o leitor de ecrã não anunciar cada bocado descarregado */
+  if (!idPrep) idPrep = REC.preparar(p => { const step = Math.floor(p * 10) / 10; if (step !== idProg){ idProg = step; idStatus(); } }).then(idStatus, idStatus);
+  idStatus();
+  return idPrep;
+}
 let idLast = [];
 function idRender(){
   const out = $('#idOut');
   $('#idNote').textContent = T('id_note', {n: SIG.length});
+  idStatus();
   if (!idLast.length){ out.innerHTML = `<p class="muted">${esc(T('id_empty'))}</p>`; return; }
   const top = idLast.slice(0, 6);
-  out.innerHTML = `${idLast.warn ? `<p class="msg warn">${esc(T('id_warn'))}</p>` : ''}<h3>${esc(T('id_res'))}</h3>
+  out.innerHTML = `${idLast.warn ? `<p class="msg warn">${esc(T('id_warn'))}</p>` : ''}${idLast.low ? `<p class="msg warn">${esc(T('id_low'))}</p>` : ''}<h3>${esc(T('id_res'))}</h3>
     <ol class="idlist">${top.map(r => { const v = byId[r.id]; return `<li><button type="button" data-open="${esc(v.id)}"><img src="${esc(r.web)}" alt="" loading="lazy"><span class="t"><b>${esc(nome(v))}</b><span class="small">${esc(v.nivel == null ? T('no_data') : T('h' + v.nivel))} · ${esc(T('aroma_label'))}: ${esc(aromaI(v) == null ? T('no_data') : T('a' + aromaI(v)))}</span></span></button></li>`; }).join('')}</ol>
     <button type="button" class="btn" id="idShow">${esc(T('id_show'))}</button>`;
 }
 async function idFile(file){
   if (!file) return;
   const out = $('#idOut'); out.innerHTML = `<p>${esc(T('id_working'))}</p>`;
+  let url = null;
   try {
-    const url = URL.createObjectURL(file);
+    url = URL.createObjectURL(file);
     const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
-    const sig = idSignature(img); URL.revokeObjectURL(url);
-    idPreview(sig);
-    if (!sig.ok){ idLast = []; out.innerHTML = `<p class="msg warn">${esc(T('id_warn'))}</p>`; return; }
-    idLast = idRank(sig); idLast.warn = sig.a < .02 || sig.a > .7;
+    let done = false;
+    const prep = idPrepare();
+    if (prep){
+      if (REC.estado() !== 'ready') out.innerHTML = `<p>${esc(T('id_working'))}</p><p class="small muted">${esc(T('id_loading', {p: Math.round(idProg * 100), mb: REC.mb()}))}</p>`;
+      await prep;
+      if (REC.estado() === 'ready'){
+        try {
+          const r = await REC.analisar(img);
+          idPreview({w: r.w, hh: r.h, mask: r.mask, cv: r.cv});
+          if (!r.ok){ idLast = []; out.innerHTML = `<p class="msg warn">${esc(T('id_warn'))}</p>`; return; }
+          idLast = r.ranking.filter(x => byId[x.id]);
+          idLast.warn = r.area < .01 || r.area > .85;
+          idLast.low = !!idLast.length && idLast[0].score < ID_LOW;
+          done = true;
+        } catch (e){ done = false; }
+      }
+    }
+    if (!done){
+      const sig = idSignature(img);
+      idPreview(sig);
+      if (!sig.ok){ idLast = []; out.innerHTML = `<p class="msg warn">${esc(T('id_warn'))}</p>`; return; }
+      idLast = idRank(sig); idLast.warn = sig.a < .02 || sig.a > .7;
+    }
     idRender();
     const h3 = out.querySelector('h3'); if (h3){ h3.setAttribute('tabindex', '-1'); h3.focus({preventScroll: true}); h3.scrollIntoView({behavior: prefs.motion || RED.matches ? 'auto' : 'smooth', block: 'nearest'}); }
   } catch (e){ idLast = []; out.innerHTML = `<p class="msg warn">${esc(T('id_err'))}</p>`; }
+  finally { if (url) URL.revokeObjectURL(url); }
 }
 const idDlg = $('#identificar'); let idBack = null;
-function openIdent(){ if (idDlg.open) return; idBack = document.activeElement; $('#ficha').open && $('#ficha').close(); idDlg.showModal(); }
+function openIdent(){ if (idDlg.open) return; idBack = document.activeElement; $('#ficha').open && $('#ficha').close(); idDlg.showModal(); idPrepare(); }
 $('#bId').addEventListener('click', openIdent);
 $('#idFechar').addEventListener('click', () => idDlg.close());
 idDlg.addEventListener('click', e => { if (e.target === idDlg) idDlg.close(); });

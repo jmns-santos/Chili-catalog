@@ -1,0 +1,20 @@
+Modelos usados pela secção "Identificar" (correm no navegador, com o ONNX Runtime Web em assets/vendor/ort).
+A fotografia do visitante nunca sai do aparelho.
+
+u2netp.onnx
+  U²-Netp: separa o objeto principal do fundo (Qin et al., 2020, "U²-Net: Going Deeper with Nested
+  U-Structure for Salient Object Detection", Pattern Recognition 106).
+  Pesos: https://github.com/xuebinqin/U-2-Net (licença Apache 2.0), na conversão ONNX distribuída pelo
+  projeto rembg (https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2netp.onnx, MIT).
+  Alteração: pesos guardados em float16 (o cálculo continua em float32), para o ficheiro ter metade do tamanho.
+
+mobilenetv2.onnx
+  MobileNetV2 treinada no ImageNet (Sandler et al., 2018, "MobileNetV2: Inverted Residuals and Linear
+  Bottlenecks", CVPR). Ficheiro de origem: OpenCV Zoo,
+  models/image_classification_mobilenet/image_classification_mobilenetv2_2022apr.onnx (licença Apache 2.0),
+  https://github.com/opencv/opencv_zoo
+  Alterações: retirada a última camada (classificação em 1000 classes); a saída passa a ser o vetor de
+  1280 números antes dessa camada. Pesos guardados em float16 (cálculo em float32).
+
+Se mudar algum destes ficheiros: correr FERRAMENTAS-SITE/gerar_assinaturas.py (refaz data/reconhecer.js)
+e mudar CACHE_MOD em sw.js.
