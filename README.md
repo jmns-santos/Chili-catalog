@@ -2,7 +2,7 @@
 
 Catálogo de malaguetas para a cozinha: picante (escala de Scoville), aroma, origem, pratos, harmonizações, cuidados e identificação por fotografia. Sete línguas (português, inglês, alemão, francês, italiano, espanhol e chinês), adaptado a computador e telemóvel.
 
-- **159 variedades**: a coleção de Edgar Andrade (87, 64 com fotografia) e 72 variedades de referência, cada uma com fontes.
+- **161 variedades**: a coleção de Edgar Andrade (89, 72 com fotografia) e 72 variedades de referência, cada uma com fontes.
 - Primeiro as fotografadas, da mais picante para a menos picante; filtros por picante, aroma, refeição, preparação, tradição, origem, espécie e coleção; mapa e gráfico picante × aroma.
 - **Iniciar coleção**: cada visitante pode criar a sua coleção, com fotografias e datas. Nada é obrigatório e a coleção é privada por defeito; só aparece na comunidade se a pessoa o escolher.
 

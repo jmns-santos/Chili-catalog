@@ -8,7 +8,7 @@
    Motor: ONNX Runtime Web (MIT), em assets/vendor/ort. Modelos em assets/modelos (ver LEIA-ME.txt). */
 (function(){
   'use strict';
-  const VER = '12';
+  const VER = '13';
   const ORT_DIR = 'assets/vendor/ort/';
   const FILES = {
     wasm: [ORT_DIR + 'ort-wasm-simd-threaded.wasm', 13961845],
